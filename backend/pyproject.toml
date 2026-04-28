@@ -5,11 +5,19 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
+    "asyncpg>=0.30.0",
+    "email-validator>=2.3.0",
+    "fastapi>=0.116.1",
     "joblib>=1.5.2",
     "matplotlib>=3.10.7",
     "numpy>=2.3.4",
     "pandas>=2.3.3",
+    "pydantic-settings>=2.11.0",
+    "pwdlib[argon2]>=0.3.0",
+    "pyjwt>=2.10.1",
     "scikit-learn>=1.7.2",
+    "sqlalchemy>=2.0.44",
+    "uvicorn>=0.38.0",
 ]
 
 [dependency-groups]
