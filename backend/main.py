@@ -5,6 +5,8 @@ from app.api.routes.agent_runs import router as agent_runs_router
 from app.api.routes.auth import router as auth_router
 from app.api.routes.classifier import router as classifier_router
 from app.api.routes.health import router as health_router
+from app.api.routes.live_conditions import router as live_conditions_router
+from app.api.routes.rag_retrieval import router as rag_retrieval_router
 from app.api.routes.recommendations import router as recommendations_router
 from app.core.config import get_settings
 from app.core.lifespan import lifespan
@@ -22,6 +24,8 @@ def create_app() -> FastAPI:
     application.include_router(auth_router)
     application.include_router(classifier_router)
     application.include_router(health_router)
+    application.include_router(live_conditions_router)
+    application.include_router(rag_retrieval_router)
     application.include_router(recommendations_router)
     return application
 

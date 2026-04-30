@@ -1,0 +1,380 @@
+{
+  "timestamp": "2026-04-29T21:29:36.389226+00:00",
+  "query_count": 6,
+  "results": [
+    {
+      "query": "I want a scenic mountain town with outdoor adventure and hiking.",
+      "expected_destinations": [
+        "Queenstown",
+        "Banff",
+        "Madeira"
+      ],
+      "matched_expected": true,
+      "top_result_destination": "Banff",
+      "top_result_similarity_score": 0.5708,
+      "results": [
+        {
+          "id": 612,
+          "destination_name": "Banff",
+          "source_type": "wikivoyage",
+          "source_title": "Banff - Wikivoyage",
+          "source_url": "https://en.wikivoyage.org/wiki/Banff",
+          "chunk_index": 23,
+          "content": "Lake, and Johnson Lake. The area is also well known for the bighorn sheep that can be seen on and near the road. Free .\n\n11 Vermilion Lakes , Vermilion Lakes Road, just south of and parallel to Trans-Canada Hwy (Hwy 1) near Mt Norquay Rd . These three shallow lakes make a marvellous foreground to dramatic Mount Rundle in the background. Come at sunrise or sunset to see muskrat and beaver and get great lighting for photos.\n\nWhimsy\n\nFor a spot of whimsy, you can check out 12 Moose and Squirrel . Rather, the intersection thereof, about 2 blocks east of the train station, diagonal from the school. Nothing more than the signpost, but good for a chuckle.\n\nDo\n\nMountain town activities are characteristically different in summer and winter.\n\nYear round",
+          "similarity_score": 0.5708
+        },
+        {
+          "id": 489,
+          "destination_name": "Queenstown",
+          "source_type": "wikivoyage",
+          "source_title": "Queenstown (New Zealand) - Wikivoyage",
+          "source_url": "https://en.wikivoyage.org/wiki/Queenstown_%28New_Zealand%29",
+          "chunk_index": 33,
+          "content": "there are six clubs in town, with facilities (and green fees) ranging from everyday to the five-star Millbrook Resort .\n\nHiking - Queenstown Hill behind the town can be climbed in about 3/4 hours for a fantastic view (and unlike most things in Queenstown it's free). There is also a nice track around the lake.\n\nTouring - the scenery surrounding Queenstown makes for excellent touring, with lakes, mountains and bush around vineyards and farmland. There are also a number of specific 'Lord of the Rings' themed tours which take in local film sites for the movie series.",
+          "similarity_score": 0.5502
+        },
+        {
+          "id": 478,
+          "destination_name": "Queenstown",
+          "source_type": "wikivoyage",
+          "source_title": "Queenstown (New Zealand) - Wikivoyage",
+          "source_url": "https://en.wikivoyage.org/wiki/Queenstown_%28New_Zealand%29",
+          "chunk_index": 22,
+          "content": "rrain park.\n\nSnow Farm - across the other side of the valley from Cardrona, this is a specialist cross-country ski area.\n\nTreble Cone - The furthest field from Queenstown, about an hour and a half away. Usually visited by people based in Wanaka, Treble Cone is seen as more of a skiers field and generally features more advanced terrain.\n\nAdventure tourism\n\nThere are dozens of attractions and providers. The information centre in town acts as a booking centre and is a great place to start inquiries. Most businesses will have a store in the CBD where they can arrange things for you. Hostels and hotels generally have a stack of pamphlets showing what is on offer, and staff are generally happy to help with recommendations and bookings. All providers generally provide transfers from Queenstown.",
+          "similarity_score": 0.549
+        },
+        {
+          "id": 613,
+          "destination_name": "Banff",
+          "source_type": "wikivoyage",
+          "source_title": "Banff - Wikivoyage",
+          "source_url": "https://en.wikivoyage.org/wiki/Banff",
+          "chunk_index": 24,
+          "content": "but good for a chuckle.\n\nDo\n\nMountain town activities are characteristically different in summer and winter.\n\nYear round\n\n1 The Banff Centre , 107 Tunnel Mountain Dr , ☏ . A globally respected arts and cultural centre featuring performances and events with dance, music, theatre, opera, film, books, new media, and visual arts.",
+          "similarity_score": 0.5446
+        },
+        {
+          "id": 641,
+          "destination_name": "Banff",
+          "source_type": "wikivoyage",
+          "source_title": "Banff - Wikivoyage",
+          "source_url": "https://en.wikivoyage.org/wiki/Banff",
+          "chunk_index": 52,
+          "content": "c golf course near to and operated by the landmark hotel. Along the season, several golf tournaments are arranged there.\n\nBanff has the most beautiful trails surrounding it. You can pick up a free trail map at the Visitor Centre, or find many trail maps online, as downloadable pdf files . Please check the trail reports online or with the Parks Canada desk before you go, as high-elevation snow, bear activity, or other factors may close trails or create hazards. Another option is to go with a hiking guide and group, different locations are available.",
+          "similarity_score": 0.5278
+        }
+      ]
+    },
+    {
+      "query": "I am looking for a historic city with temples, heritage, and traditional neighborhoods.",
+      "expected_destinations": [
+        "Kyoto",
+        "Vienna",
+        "Prague"
+      ],
+      "matched_expected": true,
+      "top_result_destination": "Kyoto",
+      "top_result_similarity_score": 0.52,
+      "results": [
+        {
+          "id": 12,
+          "destination_name": "Kyoto",
+          "source_type": "wikivoyage",
+          "source_title": "Kyoto - Wikivoyage",
+          "source_url": "https://en.wikivoyage.org/wiki/Kyoto",
+          "chunk_index": 1,
+          "content": "ples and parks which ring the city center, and find that the city has much more to offer than immediately meets the eye.\n\nThe city has a multi-lingual Official Travel Guide site .\n\nDistricts\n\nThough dwarfed in size by other major Japanese cities, Kyoto is vast in terms of its rich cultural heritage - the material endowment of over a thousand years as the country's imperial capital. The city's numerous palaces, shrines, temples and other landmarks are spread out over the following districts:\n\nUnderstand",
+          "similarity_score": 0.52
+        },
+        {
+          "id": 1156,
+          "destination_name": "Bali",
+          "source_type": "wikivoyage",
+          "source_title": "Bali - Wikivoyage",
+          "source_url": "https://en.wikivoyage.org/wiki/Bali",
+          "chunk_index": 87,
+          "content": "y 20th century. The two most famous are in the town centre of Klungkung in East Bali and in Puputan Park, Denpasar .\n\nDo\n\nBali's Hindu culture and history is both extraordinary and unique. Many visitors get so wrapped up in shopping, partying and beach life to miss the opportunity to understand and absorb at least some of this. You cannot fail to see temples, come across ceremonies and witness daily offerings, and those who take the time and effort to understand what is going on around them will find their visit very rewarding. The Balinese art of shadow puppetry (aka Wayang Kulit) is worth checking out during a visit to the island.",
+          "similarity_score": 0.5042
+        },
+        {
+          "id": 1142,
+          "destination_name": "Bali",
+          "source_type": "wikivoyage",
+          "source_title": "Bali - Wikivoyage",
+          "source_url": "https://en.wikivoyage.org/wiki/Bali",
+          "chunk_index": 73,
+          "content": "Bicycles are also available for rent and some of the better hotels will even provide them free of charge.\n\nSee\n\nTemples\n\nBali's best known attractions are its countless Hindu temples . Each village is required by adat (customary law) to construct and maintain at least three temples: the pura puseh (temple of origin) at the kaja (pure) side of the village, the pura desa (village temple) at the centre for everyday community activities and the pura dalem (temple of the dead) at the kelod (unclean) end. Wealthy villages may well have more than these three obligatory temples, and additionally all family compounds have a temple of some nature.",
+          "similarity_score": 0.4958
+        },
+        {
+          "id": 13,
+          "destination_name": "Kyoto",
+          "source_type": "wikivoyage",
+          "source_title": "Kyoto - Wikivoyage",
+          "source_url": "https://en.wikivoyage.org/wiki/Kyoto",
+          "chunk_index": 2,
+          "content": "e city's numerous palaces, shrines, temples and other landmarks are spread out over the following districts:\n\nUnderstand\n\nNestled among the mountains of the Kansai region of Western Honshu , Kyoto was the capital of Japan and the residence of the Emperor from 794 until the Meiji Restoration of 1868, when the capital was moved to Tokyo . During its millennium at the center of Japanese power, culture, tradition, and religion, it accumulated an unparalleled collection of palaces, temples and shrines, built for emperors, shoguns, and monks. Kyoto was among the few Japanese cities that escaped the allied bombings of World War II and so still has an abundance of prewar buildings, such as the traditional townhouses known as machiya . However, the city is continuously undergoing modernization with some of the traditional Kyoto buildings being replaced by newer architecture, such as the Kyoto Station complex. Kyoto is home to Japan's second most prestigious university, Kyoto University.",
+          "similarity_score": 0.4937
+        },
+        {
+          "id": 11,
+          "destination_name": "Kyoto",
+          "source_type": "wikivoyage",
+          "source_title": "Kyoto - Wikivoyage",
+          "source_url": "https://en.wikivoyage.org/wiki/Kyoto",
+          "chunk_index": 0,
+          "content": "Kyōto ( 京都 ) was the capital of Japan for over a millennium, and carries a reputation as the nation's most beautiful city and its cultural capital - even the national government's Agency for Cultural Affairs moved there in 2023. However, visitors may be surprised by how much work they will have to do to see Kyoto's beautiful side. Most first impressions of the city will be of the urban sprawl of central Kyoto, around the ultra-modern glass-and-steel train station, which is itself an example of a city steeped in tradition colliding with the modern world.\n\nNonetheless, the persistent visitor will soon discover Kyoto's hidden beauty in the temples and parks which ring the city center, and find that the city has much more to offer than immediately meets the eye.",
+          "similarity_score": 0.4925
+        }
+      ]
+    },
+    {
+      "query": "I want a romantic European city with famous landmarks, museums, and classic city walks.",
+      "expected_destinations": [
+        "Paris",
+        "Prague",
+        "Vienna"
+      ],
+      "matched_expected": true,
+      "top_result_destination": "Paris",
+      "top_result_similarity_score": 0.6108,
+      "results": [
+        {
+          "id": 835,
+          "destination_name": "Paris",
+          "source_type": "wikivoyage",
+          "source_title": "Paris - Wikivoyage",
+          "source_url": "https://en.wikivoyage.org/wiki/Paris",
+          "chunk_index": 0,
+          "content": "Paris , the cosmopolitan capital of France , has the reputation of being the most beautiful and romantic of all cities, brimming with historic associations and remaining vastly influential in the realms of culture, art, fashion, food and design.",
+          "similarity_score": 0.6108
+        },
+        {
+          "id": 842,
+          "destination_name": "Paris",
+          "source_type": "wikivoyage",
+          "source_title": "Paris - Wikivoyage",
+          "source_url": "https://en.wikivoyage.org/wiki/Paris",
+          "chunk_index": 7,
+          "content": "ck and anxiety – sometimes, severe enough that it even results in a psychiatric emergency that requires hospitalization.\n\nTo enjoy the wonders of Paris, make realistic plans. The number of attractions and landmarks is overwhelming; visiting only the most famous ones (which are overcrowded during major holidays) takes more than a week. The city also has more to offer for people who take time for a calm stroll along the back streets. If your time in the city is short, be selective, and save some attractions for your next visit.\n\nParis je t'aime . The website of the tourist office.",
+          "similarity_score": 0.5904
+        },
+        {
+          "id": 939,
+          "destination_name": "Paris",
+          "source_type": "wikivoyage",
+          "source_title": "Paris - Wikivoyage",
+          "source_url": "https://en.wikivoyage.org/wiki/Paris",
+          "chunk_index": 104,
+          "content": "lizes Paris.\n\n2 Arc de Triomphe de l'Étoile . The Arc de Triomphe exudes grandeur and offers a central view of the city.\n\n3 Champs-Élysées . Widely regarded to be one of the most recognizable avenues in the world\n\n4 Notre Dame Cathedral . Impressive Gothic cathedral that was the inspiration for Victor Hugo's novel The Hunchback of Notre Dame .\n\n5 Sacré Coeur . A church perched on top of the highest point in Paris. Behind the church is the artists' area, in front are spectacular views of the whole city.\n\n6 Opera Garnier . Masterpiece of theatre architecture of the 19th century built by Charles Garnier and inaugurated in 1875 housing the Paris Opera since it was founded by Louis XIV.",
+          "similarity_score": 0.5856
+        },
+        {
+          "id": 694,
+          "destination_name": "Prague",
+          "source_type": "wikivoyage",
+          "source_title": "Prague - Wikivoyage",
+          "source_url": "https://en.wikivoyage.org/wiki/Prague",
+          "chunk_index": 5,
+          "content": "nergy, music, cultural art, fine dining and special events catering to the independent traveller's thirst for adventure.\n\nRegarded as one of Europe's most charming and beautiful cities, Prague has become the most popular travel destination in Central Europe along with Budapest and Kraków . Millions of tourists visit the city every year.",
+          "similarity_score": 0.5701
+        },
+        {
+          "id": 941,
+          "destination_name": "Paris",
+          "source_type": "wikivoyage",
+          "source_title": "Paris - Wikivoyage",
+          "source_url": "https://en.wikivoyage.org/wiki/Paris",
+          "chunk_index": 106,
+          "content": "numents set among tree lined lanes. See the graves of Jim Morrison, Oscar Wilde, and Frédéric Chopin, among many others.\n\n11 Sainte-Chapelle . Exquisite stained glass chapel. More beautiful interior than the gloomy Notre Dame Cathedral.\n\nMuseums and galleries\n\nAll national museums and monuments are free for all every first Sunday of the month.\n\n12 The Louvre . One of the finest museums in the world of art and culture. Home of the Mona Lisa and innumerable others. Enormous building and collection, plan at least two visits..",
+          "similarity_score": 0.565
+        }
+      ]
+    },
+    {
+      "query": "I want an island trip with dramatic views and a relaxed pace.",
+      "expected_destinations": [
+        "Santorini",
+        "Bali",
+        "Madeira"
+      ],
+      "matched_expected": true,
+      "top_result_destination": "Santorini",
+      "top_result_similarity_score": 0.536,
+      "results": [
+        {
+          "id": 553,
+          "destination_name": "Santorini",
+          "source_type": "wikivoyage",
+          "source_title": "Santorini - Wikivoyage",
+          "source_url": "https://en.wikivoyage.org/wiki/Santorini",
+          "chunk_index": 40,
+          "content": "n Santorini, with characteristic blue domes. It is right next to the beach, offering opportunities for idyllic pictures.\n\nDo\n\nSantorini's breathtaking volcanic landscape, with steep cliffs and smouldering craters, is what draws more adventurous travellers to the archipelago. It does not have water parks, theme parks, or zoos, but when strolling through narrow streets in villages such as Pyrgos or Oia gets monotonous, there are ample opportunities for hiking and water activities.\n\nHiking\n\nThere aren't as many dedicated footpaths as one might expect, and cycling or mountain biking infrastructure is absent entirely. That said, there are several hiking trails on Thira illustrating that quality is more important than quantity in this case.",
+          "similarity_score": 0.536
+        },
+        {
+          "id": 1077,
+          "destination_name": "Bali",
+          "source_type": "wikivoyage",
+          "source_title": "Bali - Wikivoyage",
+          "source_url": "https://en.wikivoyage.org/wiki/Bali",
+          "chunk_index": 8,
+          "content": "minyak can be reserved for just above US$20 per day, and last-minute deals can produce rates of less than US$20 per day!\n\nAs more travelers visit, especially due to the visa-free regime introduced by the Indonesian government, this small resort island has been striving to provide more modern attractions and facilities to travelers of different interests, while retaining the exotic traditional culture & natural beauty that has always been the point of interest for visitors. Highly frequented areas such as the south of the island have been gentrifying.",
+          "similarity_score": 0.5174
+        },
+        {
+          "id": 1073,
+          "destination_name": "Bali",
+          "source_type": "wikivoyage",
+          "source_title": "Bali - Wikivoyage",
+          "source_url": "https://en.wikivoyage.org/wiki/Bali",
+          "chunk_index": 4,
+          "content": "uwatu Temple\n\n4 Kintamani — active volcano Mount Batur, stunning mountain scenery, cooler temperatures and fruit growing\n\n5 Mount Agung — highest mountain in Bali and the mother temple of Besakih\n\n6 Nusa Dua — an enclave of high-end resorts and a long, golden sand beach\n\n7 Nusa Lembongan — an island known for its surfing, diving and snorkelling; a great place to relax\n\n8 Nusa Penida — wild, rugged, untamed and as off the beaten path as you will get on the island\n\n9 West Bali National Park — trekking, birdwatching and diving in Bali's only substantial protected natural area\n\nUnderstand",
+          "similarity_score": 0.5156
+        },
+        {
+          "id": 539,
+          "destination_name": "Santorini",
+          "source_type": "wikivoyage",
+          "source_title": "Santorini - Wikivoyage",
+          "source_url": "https://en.wikivoyage.org/wiki/Santorini",
+          "chunk_index": 26,
+          "content": "e magnificent views of the island's unique scenery from the tiny town, as it is the highest point of the Caldera cliffs.\n\nAt the north end of the island is the quintessentially Santorininian town of Oia, also sometimes spelled Ia, with its whitewashed walls sunk into the volcanic rock and its blue domes rising above the sterling beauty of the stunning, russet Ammoudi Bay. At dusk, the town attracts crowds of people venturing to see the sunset, reputed to be among the world's most beautiful.\n\nNature",
+          "similarity_score": 0.514
+        },
+        {
+          "id": 1074,
+          "destination_name": "Bali",
+          "source_type": "wikivoyage",
+          "source_title": "Bali - Wikivoyage",
+          "source_url": "https://en.wikivoyage.org/wiki/Bali",
+          "chunk_index": 5,
+          "content": "est Bali National Park — trekking, birdwatching and diving in Bali's only substantial protected natural area\n\nUnderstand\n\nBali is one of more than 18,000 islands (based on a satellite view) in the Indonesian archipelago, and is just over 2 km (almost 1.5 miles) from the eastern tip of the island of Java and west of the island of Lombok . The island, home to a little over 4 million people, is about 144 km (89 mi) long from east to west and 80 km (50 mi) north to south.\n\nThe word \"paradise\" is used a lot when describing Bali. Friendly, hospitable people; a magnificently visual and spiritual culture; and spectacular beaches with great surfing and diving have made Bali the top tourist attraction in Indonesia. The vast majority of international visitors to Indonesia go nowhere else but Bali.",
+          "similarity_score": 0.5073
+        }
+      ]
+    },
+    {
+      "query": "I want a big city that still works well for flexible family travel.",
+      "expected_destinations": [
+        "Tokyo"
+      ],
+      "matched_expected": true,
+      "top_result_destination": "Banff",
+      "top_result_similarity_score": 0.4469,
+      "results": [
+        {
+          "id": 688,
+          "destination_name": "Banff",
+          "source_type": "wikivoyage",
+          "source_title": "Banff - Wikivoyage",
+          "source_url": "https://en.wikivoyage.org/wiki/Banff",
+          "chunk_index": 99,
+          "content": "the town on the Icefields Parkway .\n\nJasper National Park — even more magnificent Rockies landscapes and hiking trails.\n\nCalgary — the largest city in the province, world famous for its Stampede and an access point to many of the region's national parks.\n\nEdmonton — set in a beautiful river valley park system, Edmonton is a great place to experience live theatre and music.",
+          "similarity_score": 0.4469
+        },
+        {
+          "id": 853,
+          "destination_name": "Paris",
+          "source_type": "wikivoyage",
+          "source_title": "Paris - Wikivoyage",
+          "source_url": "https://en.wikivoyage.org/wiki/Paris",
+          "chunk_index": 18,
+          "content": "and everything in between. After all, this IS the capital of France, so anything pertaining to France can be found here.\n\nThe 21st century has also seen vast improvements in the general livability of Paris, with the mayor's office concentrating on reducing pollution and improving facilities for soft forms of transportation including a huge network of cycle paths, larger pedestrian districts and new metro lines. Visitors who normally arrive car-less are the beneficiaries of these policies as much as the Parisians themselves, although tensions and doubts have emerged over the actual benefits of those measures.\n\nClimate",
+          "similarity_score": 0.4365
+        },
+        {
+          "id": 841,
+          "destination_name": "Paris",
+          "source_type": "wikivoyage",
+          "source_title": "Paris - Wikivoyage",
+          "source_url": "https://en.wikivoyage.org/wiki/Paris",
+          "chunk_index": 6,
+          "content": "Grand Paris (814 km ) and almost 13 million people living in the metropolitan area, making this one of Europe's largest.\n\nDue to high expectations, a tight schedule, and language barriers, not to mention the large crowds and long lines at certain attractions during high season, the city also disappoints some visitors. Foreign visitors who have an idealized view of Paris might be shocked by the typical challenges of visiting any large city. They expect romance, beauty, and luxury, but they find street crime, traffic noise, pollution, garbage, and relatively high costs. In the worst case, visitors might experience the Paris syndrome , which is a state of severe culture shock and anxiety – sometimes, severe enough that it even results in a psychiatric emergency that requires hospitalization.",
+          "similarity_score": 0.4018
+        },
+        {
+          "id": 126,
+          "destination_name": "Tokyo",
+          "source_type": "wikivoyage",
+          "source_title": "Tokyo - Wikivoyage",
+          "source_url": "https://en.wikivoyage.org/wiki/Tokyo",
+          "chunk_index": 21,
+          "content": "su , the second largest city on the Shikoku island. Both trains run coupled together between Tokyo and Okayama .\n\nBy car\n\nWhile you can drive into the city, it is really not recommended as the city can be congested, signs may be confusing and parking fees are astronomical. One option that should be considered is cheaper 24-hour parking lots in cities bordering Tokyo. For example, Yashio city's train station in Saitama (prefecture) has hundreds of spaces at ¥500 per day, and is just minutes from Kita-Senju or Akihabara. A car of people can travel by highway at a fraction of the price of each person traveling by train, and can take the last leg by the cheapest train ticket into Tokyo.",
+          "similarity_score": 0.397
+        },
+        {
+          "id": 113,
+          "destination_name": "Tokyo",
+          "source_type": "wikivoyage",
+          "source_title": "Tokyo - Wikivoyage",
+          "source_url": "https://en.wikivoyage.org/wiki/Tokyo",
+          "chunk_index": 8,
+          "content": "t's all perfectly safe, and the locals will go to sometimes extraordinary lengths to help you if you just ask.\n\nExpenses\n\nThe cost of living in Tokyo is not as astronomical as it once was. Deflation and market pressures have helped to make costs in Tokyo comparable to most other large cities in the developed world. Visitors from San Francisco , Los Angeles , New York , Chicago , London , Paris , Sydney , Toronto and Dublin will not find it any more expensive than back home. Rent will be significantly cheaper than big Western cities like NYC, London, San Francisco, and Los Angeles. Travelers should budget a similar amount of money for their stay in Tokyo as they would for any other great city in Europe , North America or Australia . Locals will know the bargains, but experienced cheapskates from anywhere in the world can get by with a little ingenuity. Tokyo is one of the most popular places to live in Japan. Rent for a single's apartment could range from US$500 to US$1,000 a month. Tokyo is so overwhelmingly crowded that many people live in apartments no bigger than 16 square meters (175 square feet). That being said, with excellent transportation throughout Tokyo and its outskirts, living five minutes further away from central Tokyo could mean hundreds of dollars less for living expenses each month or allow for larger housing. Many parts of Chiba, Saitama, Kanagawa, or even Ibaraki prefectures may allow the feeling of \"living in Tokyo\". Still, nothing compares to Tokyo itself in regards to waking up and stepping outside instantly into metropolitan life.",
+          "similarity_score": 0.3944
+        }
+      ]
+    },
+    {
+      "query": "I want a destination in New Zealand that is famous for adventure tourism.",
+      "expected_destinations": [
+        "Queenstown"
+      ],
+      "matched_expected": true,
+      "top_result_destination": "Queenstown",
+      "top_result_similarity_score": 0.6615,
+      "results": [
+        {
+          "id": 484,
+          "destination_name": "Queenstown",
+          "source_type": "wikivoyage",
+          "source_title": "Queenstown (New Zealand) - Wikivoyage",
+          "source_url": "https://en.wikivoyage.org/wiki/Queenstown_%28New_Zealand%29",
+          "chunk_index": 28,
+          "content": "u\n\nQuad-bike tours - are available, some of which are specifically designed to take in Lord of the Rings film locations.\n\nRiverboarding - Swimming through rapids on a bodyboard.\n\nMad Dog Riverboarding , 37 Shotover Street , ☏ . An action-packed and personally challenging white water activity.\n\nNZONE Skydive , 35 Shotover St , toll-free: , skydive@nzone.biz . First commercial tandem skydive company in New Zealand, operating since 1990.\n\nWhite water rafting - Single and multi-day options, including a chance to go 'black water rafting' through an underground tunnel.",
+          "similarity_score": 0.6615
+        },
+        {
+          "id": 478,
+          "destination_name": "Queenstown",
+          "source_type": "wikivoyage",
+          "source_title": "Queenstown (New Zealand) - Wikivoyage",
+          "source_url": "https://en.wikivoyage.org/wiki/Queenstown_%28New_Zealand%29",
+          "chunk_index": 22,
+          "content": "rrain park.\n\nSnow Farm - across the other side of the valley from Cardrona, this is a specialist cross-country ski area.\n\nTreble Cone - The furthest field from Queenstown, about an hour and a half away. Usually visited by people based in Wanaka, Treble Cone is seen as more of a skiers field and generally features more advanced terrain.\n\nAdventure tourism\n\nThere are dozens of attractions and providers. The information centre in town acts as a booking centre and is a great place to start inquiries. Most businesses will have a store in the CBD where they can arrange things for you. Hostels and hotels generally have a stack of pamphlets showing what is on offer, and staff are generally happy to help with recommendations and bookings. All providers generally provide transfers from Queenstown.",
+          "similarity_score": 0.6406
+        },
+        {
+          "id": 457,
+          "destination_name": "Queenstown",
+          "source_type": "wikivoyage",
+          "source_title": "Queenstown (New Zealand) - Wikivoyage",
+          "source_url": "https://en.wikivoyage.org/wiki/Queenstown_%28New_Zealand%29",
+          "chunk_index": 1,
+          "content": "of the South Island — if not all of New Zealand. For many travellers, it’s a must-see stop on any New Zealand itinerary.\n\nOn the shores of Lake Wakatipu, New Zealand’s third-largest lake (291 km² or 112 sq mi), and surrounded by dramatic mountain scenery, Queenstown's setting is nothing short of spectacular. Its natural beauty draws visitors in all seasons. The town caters to a wide range of travellers, offering everything from backpacker hostels to five-star luxury resorts, as well as a broad mix of attractions, adventure activities, and dining options for nearly every budget.",
+          "similarity_score": 0.6305
+        },
+        {
+          "id": 487,
+          "destination_name": "Queenstown",
+          "source_type": "wikivoyage",
+          "source_title": "Queenstown (New Zealand) - Wikivoyage",
+          "source_url": "https://en.wikivoyage.org/wiki/Queenstown_%28New_Zealand%29",
+          "chunk_index": 31,
+          "content": "rankton is on the way to Arrowtown so it makes sense to rent from here rather than somewhere back in the Queenstown CBD.\n\nOff the Rails . Guided cycle tours on the world famous Otago Rail Trail from Sept to May. Departing from Queenstown. Includes bike hire, accommodation, breakfasts and transport.\n\nHorseback riding . There are some great tours that pick up in Queenstown and take you into the valleys, through rivers, etc. Pamphlets can be collected at any hotel or hostel to explore the dozens of horseback tours\n\nFishing and flyfishing . Lake Wakatipu is known for trout. You cannot buy fish from lakes in New Zealand, you have to fish for them yourself. Flyfishing is also available locally.",
+          "similarity_score": 0.6182
+        },
+        {
+          "id": 485,
+          "destination_name": "Queenstown",
+          "source_type": "wikivoyage",
+          "source_title": "Queenstown (New Zealand) - Wikivoyage",
+          "source_url": "https://en.wikivoyage.org/wiki/Queenstown_%28New_Zealand%29",
+          "chunk_index": 29,
+          "content": "er rafting - Single and multi-day options, including a chance to go 'black water rafting' through an underground tunnel.\n\nZiptrek Ecotours - New Zealand's #1 original zipline tour. Amazing zipline tours through the forest high up on Bobs Peak and accessed by the Skyline Gondola. A fully guided tour with cool tree house architecture interconnected by fun ziplines, stunning views and a little bit of education on the environment, Queenstown history and local flora & fauna.\n\nOther\n\nCruise on the TSS Earnslaw . Lake cruises on Lake Wakatipu offer great views of the town, surrounding mountains, etc. The TSS Earnslaw is a popular historic (1911) steamship which offers daily tours. There are also private charter providers. $70 .",
+          "similarity_score": 0.6146
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+query,expected_destinations,matched_expected,top_result_destination,top_result_similarity_score
+I want a scenic mountain town with outdoor adventure and hiking.,"Queenstown, Banff, Madeira",True,Banff,0.5708
+"I am looking for a historic city with temples, heritage, and traditional neighborhoods.","Kyoto, Vienna, Prague",True,Kyoto,0.52
+"I want a romantic European city with famous landmarks, museums, and classic city walks.","Paris, Prague, Vienna",True,Paris,0.6108
+I want an island trip with dramatic views and a relaxed pace.,"Santorini, Bali, Madeira",True,Santorini,0.536
+I want a big city that still works well for flexible family travel.,Tokyo,True,Banff,0.4469
+I want a destination in New Zealand that is famous for adventure tourism.,Queenstown,True,Queenstown,0.6615

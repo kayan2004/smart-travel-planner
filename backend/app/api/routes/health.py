@@ -18,4 +18,8 @@ async def health_check(request: Request) -> dict[str, str | bool]:
         "destination_catalog_loaded": (
             request.app.state.resources.get("destination_catalog") is not None
         ),
+        "tool_registry_loaded": (
+            request.app.state.resources.get("tool_registry") is not None
+        ),
+        "weather_provider": "open-meteo",
     }

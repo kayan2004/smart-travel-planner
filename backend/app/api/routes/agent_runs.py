@@ -6,6 +6,7 @@ from app.db.dependencies import get_db_session
 from app.db.models.user import User
 from app.schemas.agent_runs import AgentRunCreate, AgentRunRead
 from app.services.agent_runs import create_agent_run
+from app.agent.tools.base import ToolContext
 
 router = APIRouter(prefix="/agent-runs", tags=["agent-runs"])
 
@@ -17,11 +18,19 @@ async def create_agent_run_route(
     current_user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_db_session),
 ) -> AgentRunRead:
-    travel_style_model = request.app.state.resources.get("travel_style_model")
+    tool_registry = request.app.state.resources.get("tool_registry")
+    http_client = request.app.state.resources.get("http_client")
+    tool_context = ToolContext(
+        settings=request.app.state.settings,
+        resources=request.app.state.resources,
+        session=session,
+        http_client=http_client,
+    )
     agent_run = await create_agent_run(
         session,
         current_user,
         payload,
-        travel_style_model=travel_style_model,
+        tool_registry=tool_registry,
+        tool_context=tool_context,
     )
     return AgentRunRead.model_validate(agent_run)

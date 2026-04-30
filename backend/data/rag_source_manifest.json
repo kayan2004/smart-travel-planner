@@ -1,0 +1,62 @@
+[
+  {
+    "destination_name": "Kyoto",
+    "source_type": "wikivoyage",
+    "source_title": "Kyoto - Wikivoyage",
+    "source_url": "https://en.wikivoyage.org/wiki/Kyoto"
+  },
+  {
+    "destination_name": "Tokyo",
+    "source_type": "wikivoyage",
+    "source_title": "Tokyo - Wikivoyage",
+    "source_url": "https://en.wikivoyage.org/wiki/Tokyo"
+  },
+  {
+    "destination_name": "Vienna",
+    "source_type": "wikivoyage",
+    "source_title": "Vienna - Wikivoyage",
+    "source_url": "https://en.wikivoyage.org/wiki/Vienna"
+  },
+  {
+    "destination_name": "Madeira",
+    "source_type": "wikivoyage",
+    "source_title": "Madeira - Wikivoyage",
+    "source_url": "https://en.wikivoyage.org/wiki/Madeira"
+  },
+  {
+    "destination_name": "Queenstown",
+    "source_type": "wikivoyage",
+    "source_title": "Queenstown (New Zealand) - Wikivoyage",
+    "source_url": "https://en.wikivoyage.org/wiki/Queenstown_%28New_Zealand%29"
+  },
+  {
+    "destination_name": "Santorini",
+    "source_type": "wikivoyage",
+    "source_title": "Santorini - Wikivoyage",
+    "source_url": "https://en.wikivoyage.org/wiki/Santorini"
+  },
+  {
+    "destination_name": "Banff",
+    "source_type": "wikivoyage",
+    "source_title": "Banff - Wikivoyage",
+    "source_url": "https://en.wikivoyage.org/wiki/Banff"
+  },
+  {
+    "destination_name": "Prague",
+    "source_type": "wikivoyage",
+    "source_title": "Prague - Wikivoyage",
+    "source_url": "https://en.wikivoyage.org/wiki/Prague"
+  },
+  {
+    "destination_name": "Paris",
+    "source_type": "wikivoyage",
+    "source_title": "Paris - Wikivoyage",
+    "source_url": "https://en.wikivoyage.org/wiki/Paris"
+  },
+  {
+    "destination_name": "Bali",
+    "source_type": "wikivoyage",
+    "source_title": "Bali - Wikivoyage",
+    "source_url": "https://en.wikivoyage.org/wiki/Bali"
+  }
+]

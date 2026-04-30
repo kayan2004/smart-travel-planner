@@ -1,0 +1,26 @@
+[
+  {
+    "query": "I want a scenic mountain town with outdoor adventure and hiking.",
+    "expected_destinations": ["Queenstown", "Banff", "Madeira"]
+  },
+  {
+    "query": "I am looking for a historic city with temples, heritage, and traditional neighborhoods.",
+    "expected_destinations": ["Kyoto", "Vienna", "Prague"]
+  },
+  {
+    "query": "I want a romantic European city with famous landmarks, museums, and classic city walks.",
+    "expected_destinations": ["Paris", "Prague", "Vienna"]
+  },
+  {
+    "query": "I want an island trip with dramatic views and a relaxed pace.",
+    "expected_destinations": ["Santorini", "Bali", "Madeira"]
+  },
+  {
+    "query": "I want a big city that still works well for flexible family travel.",
+    "expected_destinations": ["Tokyo"]
+  },
+  {
+    "query": "I want a destination in New Zealand that is famous for adventure tourism.",
+    "expected_destinations": ["Queenstown"]
+  }
+]
