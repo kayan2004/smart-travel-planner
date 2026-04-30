@@ -1,6 +1,9 @@
 from functools import lru_cache
+from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+ENV_FILE = Path(__file__).resolve().parents[2] / ".env"
 
 
 class Settings(BaseSettings):
@@ -9,6 +12,7 @@ class Settings(BaseSettings):
     app_debug: bool = True
     app_host: str = "0.0.0.0"
     app_port: int = 8000
+    frontend_origin: str = "http://localhost:5173"
     database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/smart_travel_assistant"
     database_echo: bool = False
     jwt_secret_key: str = "change-this-development-secret-to-32-plus-chars"
@@ -29,12 +33,22 @@ class Settings(BaseSettings):
     voyage_timeout_seconds: float = 30.0
     voyage_requests_per_minute: int = 3
     voyage_max_retries: int = 3
+    anthropic_api_key: str = ""
+    anthropic_api_base_url: str = "https://api.anthropic.com"
+    anthropic_api_version: str = "2023-06-01"
+    anthropic_fast_model: str = "claude-3-5-haiku-latest"
+    anthropic_strong_model: str = "claude-sonnet-4-5"
+    anthropic_max_tokens: int = 700
+    anthropic_temperature: float = 0.2
+    discord_webhook_url: str = ""
+    discord_webhook_username: str = "Smart Travel Assistant"
+    discord_webhook_timeout_seconds: float = 15.0
     open_meteo_geocoding_base_url: str = "https://geocoding-api.open-meteo.com"
     open_meteo_forecast_base_url: str = "https://api.open-meteo.com"
     weather_request_timeout_seconds: float = 20.0
 
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=ENV_FILE,
         env_file_encoding="utf-8",
         extra="ignore",
     )

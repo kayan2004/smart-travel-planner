@@ -1,9 +1,13 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
 from app.api.routes.agent_runs import router as agent_runs_router
+from app.api.routes.anthropic import router as anthropic_router
 from app.api.routes.auth import router as auth_router
+from app.api.routes.claude import router as claude_router
 from app.api.routes.classifier import router as classifier_router
+from app.api.routes.discord_webhook import router as discord_webhook_router
 from app.api.routes.health import router as health_router
 from app.api.routes.live_conditions import router as live_conditions_router
 from app.api.routes.rag_retrieval import router as rag_retrieval_router
@@ -20,9 +24,19 @@ def create_app() -> FastAPI:
         debug=settings.app_debug,
         lifespan=lifespan,
     )
+    application.add_middleware(
+        CORSMiddleware,
+        allow_origins=[settings.frontend_origin],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
     application.include_router(agent_runs_router)
+    application.include_router(anthropic_router)
     application.include_router(auth_router)
+    application.include_router(claude_router)
     application.include_router(classifier_router)
+    application.include_router(discord_webhook_router)
     application.include_router(health_router)
     application.include_router(live_conditions_router)
     application.include_router(rag_retrieval_router)

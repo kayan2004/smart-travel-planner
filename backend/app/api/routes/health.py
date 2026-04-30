@@ -22,4 +22,5 @@ async def health_check(request: Request) -> dict[str, str | bool]:
             request.app.state.resources.get("tool_registry") is not None
         ),
         "weather_provider": "open-meteo",
+        "discord_webhook_configured": bool(settings.discord_webhook_url),
     }

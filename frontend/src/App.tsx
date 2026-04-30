@@ -4,7 +4,6 @@ import type { FormEvent } from 'react'
 import './App.css'
 import {
   ApiError,
-  API_BASE_URL,
   createAgentRun,
   fetchCurrentUser,
   login,
@@ -12,8 +11,54 @@ import {
 } from './lib/api'
 import type { AgentRunRead, AuthMode, SessionState } from './types'
 
+type View = 'login' | 'signup' | 'app'
+
+const APP_ROUTE = '/app'
+const LOGIN_ROUTE = '/login'
+const SIGNUP_ROUTE = '/signup'
+
+function getViewFromPath(pathname: string): View {
+  if (pathname === SIGNUP_ROUTE) {
+    return 'signup'
+  }
+  if (pathname === APP_ROUTE) {
+    return 'app'
+  }
+  return 'login'
+}
+
+function navigateTo(view: View, replace = false) {
+  const target =
+    view === 'signup' ? SIGNUP_ROUTE : view === 'app' ? APP_ROUTE : LOGIN_ROUTE
+  const nextUrl = `${target}${window.location.search}${window.location.hash}`
+
+  if (replace) {
+    window.history.replaceState(null, '', nextUrl)
+    return
+  }
+
+  window.history.pushState(null, '', nextUrl)
+}
+
+function renderInlineBoldText(text: string) {
+  const parts = text.split(/(\*\*.*?\*\*)/g)
+
+  return parts.map((part, index) => {
+    const isBold = part.startsWith('**') && part.endsWith('**') && part.length > 4
+    if (!isBold) {
+      return <span key={`${part}-${index}`}>{part}</span>
+    }
+
+    return (
+      <strong key={`${part}-${index}`} className="markdown-strong">
+        {part.slice(2, -2)}
+      </strong>
+    )
+  })
+}
+
 function App() {
-  const [authMode, setAuthMode] = useState<AuthMode>('login')
+  const [view, setView] = useState<View>(() => getViewFromPath(window.location.pathname))
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -28,17 +73,41 @@ function App() {
   const [authPending, setAuthPending] = useState(false)
   const [plannerPending, setPlannerPending] = useState(false)
 
+  const authMode: AuthMode = view === 'signup' ? 'signup' : 'login'
+
+  useEffect(() => {
+    const handlePopState = () => {
+      setView(getViewFromPath(window.location.pathname))
+    }
+
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [])
+
   useEffect(() => {
     const raw = window.localStorage.getItem('smart-travel-session')
     if (!raw) {
+      if (view === 'app') {
+        navigateTo('login', true)
+        setView('login')
+      }
       return
     }
 
     try {
       const parsed = JSON.parse(raw) as SessionState
       setSession(parsed)
+
+      if (getViewFromPath(window.location.pathname) !== 'app') {
+        navigateTo('app', true)
+        setView('app')
+      }
     } catch {
       window.localStorage.removeItem('smart-travel-session')
+      if (view === 'app') {
+        navigateTo('login', true)
+        setView('login')
+      }
     }
   }, [])
 
@@ -50,10 +119,21 @@ function App() {
         'smart-travel-session',
         JSON.stringify(nextSession),
       )
+      navigateTo('app')
+      setView('app')
       return
     }
 
     window.localStorage.removeItem('smart-travel-session')
+    navigateTo('login')
+    setView('login')
+  }
+
+  function handleAuthViewChange(nextMode: AuthMode) {
+    setAuthError('')
+    const nextView = nextMode === 'signup' ? 'signup' : 'login'
+    navigateTo(nextView)
+    setView(nextView)
   }
 
   async function handleAuthSubmit(event: FormEvent<HTMLFormElement>) {
@@ -87,6 +167,8 @@ function App() {
 
     if (!session) {
       setPlannerError('Please log in first.')
+      navigateTo('login')
+      setView('login')
       return
     }
 
@@ -113,118 +195,115 @@ function App() {
     setResult(null)
   }
 
-  return (
-    <main className="shell">
-      <section className="hero-panel">
-        <p className="eyebrow">Smart Travel Assistant</p>
-        <h1>Prompt-first trip planning with your backend agent in the loop.</h1>
-        <p className="hero-copy">
-          This MVP signs in, sends one natural-language travel request to
-          LangGraph, and shows the saved recommendation with its tool trail.
-        </p>
-        <div className="hero-meta">
-          <span>API: {API_BASE_URL}</span>
-          <span>Delivery: Discord webhook enabled in backend</span>
-        </div>
-      </section>
+  if (view !== 'app' || !session) {
+    return (
+      <main className="auth-shell">
+        <section className="auth-hero">
+          <p className="eyebrow">Smart Travel Assistant</p>
+          <h1>Sign in before you ask the agent where to go.</h1>
+          <p className="hero-copy">
+            This app turns a plain-English travel request into a recommendation,
+            current conditions, and a tool-by-tool audit trail.
+          </p>
+        </section>
 
-      <section className="workspace">
-        <div className="panel auth-panel">
+        <section className="panel auth-page-panel">
           <div className="panel-heading">
             <div>
               <p className="panel-label">Authentication</p>
-              <h2>{session ? 'Signed in' : 'Connect to the backend'}</h2>
+              <h2>{authMode === 'login' ? 'Welcome back' : 'Create your account'}</h2>
             </div>
-            {!session ? (
-              <div
-                className="segmented-control"
-                role="tablist"
-                aria-label="Auth mode"
-              >
-                <button
-                  type="button"
-                  className={authMode === 'login' ? 'active' : ''}
-                  onClick={() => setAuthMode('login')}
-                >
-                  Login
-                </button>
-                <button
-                  type="button"
-                  className={authMode === 'signup' ? 'active' : ''}
-                  onClick={() => setAuthMode('signup')}
-                >
-                  Sign up
-                </button>
-              </div>
-            ) : null}
-          </div>
-
-          {session ? (
-            <div className="session-card">
-              <p className="session-name">{session.user.full_name || 'Traveler'}</p>
-              <p>{session.user.email}</p>
-              <p className="session-meta">
-                User #{session.user.id} - Active {session.user.is_active ? 'yes' : 'no'}
-              </p>
+            <div className="segmented-control" role="tablist" aria-label="Auth mode">
               <button
                 type="button"
-                className="secondary-button"
-                onClick={handleLogout}
+                className={authMode === 'login' ? 'active' : ''}
+                onClick={() => handleAuthViewChange('login')}
               >
-                Log out
+                Login
+              </button>
+              <button
+                type="button"
+                className={authMode === 'signup' ? 'active' : ''}
+                onClick={() => handleAuthViewChange('signup')}
+              >
+                Sign up
               </button>
             </div>
-          ) : (
-            <form className="form-grid" onSubmit={handleAuthSubmit}>
-              {authMode === 'signup' ? (
-                <label>
-                  <span>Full name</span>
-                  <input
-                    value={fullName}
-                    onChange={(event) => setFullName(event.target.value)}
-                    placeholder="Kayan"
-                  />
-                </label>
-              ) : null}
-              <label>
-                <span>Email</span>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(event) => setEmail(event.target.value)}
-                  placeholder="you@example.com"
-                  required
-                />
-              </label>
-              <label>
-                <span>Password</span>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                  placeholder="At least 8 characters"
-                  required
-                />
-              </label>
-              {authError ? <p className="error-text">{authError}</p> : null}
-              <button type="submit" className="primary-button" disabled={authPending}>
-                {authPending
-                  ? 'Working...'
-                  : authMode === 'login'
-                    ? 'Login and load session'
-                    : 'Create account and continue'}
-              </button>
-            </form>
-          )}
-        </div>
+          </div>
 
+          <form className="form-grid" onSubmit={handleAuthSubmit}>
+            {authMode === 'signup' ? (
+              <label>
+                <span>Full name</span>
+                <input
+                  value={fullName}
+                  onChange={(event) => setFullName(event.target.value)}
+                  placeholder="Kayan"
+                />
+              </label>
+            ) : null}
+            <label>
+              <span>Email</span>
+              <input
+                type="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                placeholder="you@example.com"
+                required
+              />
+            </label>
+            <label>
+              <span>Password</span>
+              <input
+                type="password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                placeholder="At least 8 characters"
+                required
+              />
+            </label>
+            {authError ? <p className="error-text">{authError}</p> : null}
+            <button type="submit" className="primary-button" disabled={authPending}>
+              {authPending
+                ? 'Working...'
+                : authMode === 'login'
+                  ? 'Login and continue'
+                  : 'Create account and continue'}
+            </button>
+          </form>
+        </section>
+      </main>
+    )
+  }
+
+  return (
+    <main className="shell">
+      <section className="hero-panel">
+        <div className="hero-header">
+          <div>
+            <p className="eyebrow">Smart Travel Assistant</p>
+            <h1>Prompt-first trip planning with your backend agent in the loop.</h1>
+          </div>
+          <div className="session-chip">
+            <strong>{session.user.full_name || 'Traveler'}</strong>
+            <span>{session.user.email}</span>
+          </div>
+        </div>
+        <div className="hero-meta">
+          <button type="button" className="link-button" onClick={handleLogout}>
+            Log out
+          </button>
+        </div>
+      </section>
+
+      <section className="workspace app-workspace">
         <div className="panel planner-panel">
           <div className="panel-heading">
             <div>
               <p className="panel-label">Planner</p>
               <h2>Ask for a trip recommendation</h2>
             </div>
-            <span className="status-pill">{session ? 'Ready' : 'Auth required'}</span>
+            <span className="status-pill status-ready">Ready</span>
           </div>
 
           <form className="form-grid" onSubmit={handlePlanSubmit}>
@@ -248,11 +327,7 @@ function App() {
               />
             </label>
             {plannerError ? <p className="error-text">{plannerError}</p> : null}
-            <button
-              type="submit"
-              className="primary-button"
-              disabled={plannerPending || !session}
-            >
+            <button type="submit" className="primary-button" disabled={plannerPending}>
               {plannerPending ? 'Planning trip...' : 'Run agent'}
             </button>
           </form>
@@ -280,7 +355,7 @@ function App() {
               <p className="prompt-preview">{result.prompt}</p>
               <div className="response-card">
                 {result.response.split('\n').map((line, index) => (
-                  <p key={`${line}-${index}`}>{line}</p>
+                  <p key={`${line}-${index}`}>{renderInlineBoldText(line)}</p>
                 ))}
               </div>
             </>

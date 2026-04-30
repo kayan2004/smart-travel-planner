@@ -1,0 +1,19 @@
+<svg width="1600" height="900" viewBox="0 0 1600 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1600" height="900" fill="#EED8B9"/>
+  <circle cx="1270" cy="170" r="118" fill="#E7A95A" fill-opacity="0.55"/>
+  <circle cx="270" cy="180" r="150" fill="#6FA3A1" fill-opacity="0.22"/>
+  <path d="M0 670C108 606 198 580 315 600C442 621 530 704 664 715C817 727 905 641 1028 621C1173 597 1320 653 1600 576V900H0V670Z" fill="#7CA7A2" fill-opacity="0.5"/>
+  <path d="M0 746C116 696 217 680 330 695C456 712 554 787 695 804C847 823 949 741 1060 720C1228 687 1378 722 1600 664V900H0V746Z" fill="#365F63" fill-opacity="0.58"/>
+  <path d="M360 575L505 372L652 575H360Z" fill="#F8F0E3" fill-opacity="0.85"/>
+  <path d="M550 575L725 296L904 575H550Z" fill="#FFF8ED" fill-opacity="0.82"/>
+  <path d="M820 575L980 350L1142 575H820Z" fill="#F2E6D4" fill-opacity="0.82"/>
+  <rect x="1010" y="204" width="250" height="156" rx="20" transform="rotate(8 1010 204)" fill="#FFF7EA" fill-opacity="0.68" stroke="#C97A4C" stroke-width="4" stroke-dasharray="12 10"/>
+  <text x="1066" y="291" fill="#C97A4C" font-family="Trebuchet MS, Arial, sans-serif" font-size="44" font-weight="700">BOARDING</text>
+  <text x="1095" y="338" fill="#C97A4C" font-family="Trebuchet MS, Arial, sans-serif" font-size="32" font-weight="700">PASS</text>
+  <path d="M245 226C314 167 402 145 503 161C609 178 681 250 744 309C814 374 882 429 993 417C1094 406 1188 326 1303 323" stroke="#385D61" stroke-width="7" stroke-linecap="round" stroke-dasharray="4 18"/>
+  <path d="M1310 308L1264 292L1286 332L1228 358L1247 384L1307 347L1330 388L1354 341L1411 357L1390 321L1438 301L1418 274L1357 290L1338 252L1310 308Z" fill="#385D61"/>
+  <circle cx="250" cy="230" r="48" fill="#FFF6E8" fill-opacity="0.56" stroke="#C97A4C" stroke-width="5"/>
+  <text x="217" y="244" fill="#C97A4C" font-family="Trebuchet MS, Arial, sans-serif" font-size="18" font-weight="700">GO</text>
+  <circle cx="1320" cy="690" r="74" fill="#FFF6E8" fill-opacity="0.42"/>
+  <path d="M1286 716C1302 684 1320 650 1341 622C1346 645 1358 674 1372 699C1350 701 1324 706 1286 716Z" fill="#E7A95A" fill-opacity="0.75"/>
+</svg>

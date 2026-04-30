@@ -1,0 +1,34 @@
+Extract travel-planning fields from the user prompt.
+
+Return strict JSON only with exactly this shape:
+{
+  "destination_name": string | null,
+  "location_query": string | null,
+  "location_country_code": string | null,
+  "travel_profile": {
+    "region": string,
+    "budget_level": "low" | "medium" | "high",
+    "tourism_level": "low" | "medium" | "high",
+    "has_hiking": boolean,
+    "has_beach": boolean,
+    "culture_score": number,
+    "luxury_score": number,
+    "family_friendly": number,
+    "nightlife_level": number,
+    "avg_temp_peak": number
+  } | null
+}
+
+Rules:
+- Do not add any text outside the JSON.
+- Only fill destination fields if the user clearly named a place. Otherwise return null for them.
+- Even if no destination is named, still infer travel_profile when the preferences are clear.
+- If region is unclear, use "Flexible".
+- budget_level and tourism_level must be one of: low, medium, high.
+- culture_score, luxury_score, family_friendly, and nightlife_level must be numbers from 0 to 10.
+- family_friendly must be numeric, not boolean.
+- avg_temp_peak must use the model's training-data scale: Celsius-style values, not Fahrenheit.
+- Infer values from explicit hints like budget, hiking, beach, warm/cool weather, culture, luxury, nightlife, and family orientation.
+
+User prompt:
+{{USER_PROMPT}}
