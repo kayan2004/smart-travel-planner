@@ -23,6 +23,8 @@ dependencies = [
     "scikit-learn>=1.7.2",
     "sqlalchemy>=2.0.44",
     "uvicorn>=0.38.0",
+    "umap-learn>=0.5.7",
+    "hdbscan>=0.8.40",
 ]
 
 [dependency-groups]

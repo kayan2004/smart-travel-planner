@@ -52,6 +52,11 @@ class Destination(DestinationCorpusBase):
     embedding_model: Mapped[str | None] = mapped_column(String(100), nullable=True)
     embedding_version: Mapped[str | None] = mapped_column(String(50), nullable=True)
     content_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    # Weighted multi-tags from offline HDBSCAN soft clustering (see
+    # scripts/cluster_destinations.py). Keyed by cluster_id until naming is
+    # approved (Phase 2), then rewritten to tag_name keys. {} until the
+    # corpus has been clustered.
+    tags: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),

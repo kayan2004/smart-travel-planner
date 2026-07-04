@@ -1,16 +1,25 @@
 metric,value
-timestamp,2026-07-04T11:09:57.942047+00:00
-total_destinations,5
-embedded_count,0
+timestamp,2026-07-04T16:10:11.332094+00:00
+total_destinations,219
+embedded_count,214
 skipped_embedding_count,5
 numbeo_lookup_available,True
 opentripmap_configured,True
-region_count:Europe,5
-missing_field_rate:budget_level,0.0
-missing_field_rate:poi_summary,0.0
+region_count:Europe,79
+region_count:Asia,44
+region_count:North America,28
+region_count:South America,18
+region_count:Africa,15
+region_count:Oceania,11
+region_count:Middle East,11
+region_count:Caribbean,7
+region_count:Central America,5
+region_count:Europe/Asia,1
+missing_field_rate:budget_level,0.347
+missing_field_rate:poi_summary,0.0091
 missing_field_rate:wikivoyage_summary,0.0
 missing_field_rate:embedding,0.0
-details_length:min,1113.0
-details_length:max,1617.0
-details_length:mean,1450.2
-details_length:median,1498.0
+details_length:min,250.0
+details_length:max,1697.0
+details_length:mean,1498.6
+details_length:median,1574.0

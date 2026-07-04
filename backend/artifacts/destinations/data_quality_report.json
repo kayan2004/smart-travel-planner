@@ -1,23 +1,32 @@
 {
-  "timestamp": "2026-07-04T11:09:57.942047+00:00",
-  "total_destinations": 5,
+  "timestamp": "2026-07-04T16:10:11.332094+00:00",
+  "total_destinations": 219,
   "region_counts": {
-    "Europe": 5
+    "Europe": 79,
+    "Europe/Asia": 1,
+    "Asia": 44,
+    "North America": 28,
+    "South America": 18,
+    "Oceania": 11,
+    "Africa": 15,
+    "Middle East": 11,
+    "Caribbean": 7,
+    "Central America": 5
   },
   "missing_field_rates": {
-    "budget_level": 0.0,
-    "poi_summary": 0.0,
+    "budget_level": 0.3470319634703196,
+    "poi_summary": 0.0091324200913242,
     "wikivoyage_summary": 0.0,
     "embedding": 0.0
   },
   "details_length_stats": {
-    "min": 1113.0,
-    "max": 1617.0,
-    "mean": 1450.2,
-    "median": 1498.0
+    "min": 250.0,
+    "max": 1697.0,
+    "mean": 1498.5616438356165,
+    "median": 1574.0
   },
   "sources_failed_counts": {},
-  "embedded_count": 0,
+  "embedded_count": 214,
   "skipped_embedding_count": 5,
   "numbeo_lookup_available": true,
   "opentripmap_configured": true,
