@@ -33,6 +33,8 @@ class Settings(BaseSettings):
     voyage_timeout_seconds: float = 30.0
     voyage_requests_per_minute: int = 3
     voyage_max_retries: int = 3
+    llm_provider: str = "anthropic"  # "anthropic" | "gemini" - selects the provider for all
+    # three LLM call sites (extraction, synthesis, cluster naming). See app/services/llm_providers.py.
     anthropic_api_key: str = ""
     anthropic_api_base_url: str = "https://api.anthropic.com"
     anthropic_api_version: str = "2023-06-01"
@@ -40,6 +42,13 @@ class Settings(BaseSettings):
     anthropic_strong_model: str = "claude-sonnet-4-5"
     anthropic_max_tokens: int = 700
     anthropic_temperature: float = 0.2
+    gemini_api_key: str = ""
+    gemini_api_base_url: str = "https://generativelanguage.googleapis.com"
+    gemini_api_version: str = "v1beta"
+    gemini_fast_model: str = "gemma-4-26b-a4b-it"
+    gemini_strong_model: str = "gemma-4-31b-it"
+    gemini_max_tokens: int = 700
+    gemini_temperature: float = 0.2
     discord_webhook_url: str = ""
     discord_webhook_username: str = "Smart Travel Assistant"
     discord_webhook_timeout_seconds: float = 15.0
