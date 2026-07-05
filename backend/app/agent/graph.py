@@ -22,7 +22,6 @@ class TripPlannerState(TypedDict):
     retrieval_top_k: int
     status: str
     response_sections: list[str]
-    predicted_style: NotRequired[str | None]
     recommended_destinations: NotRequired[list[dict[str, Any]]]
     final_response: NotRequired[str | None]
     tool_logs: list[dict[str, str]]
@@ -40,87 +39,7 @@ def initialize_trip_state(state: TripPlannerState) -> TripPlannerState:
         "recommended_destinations": [],
         "final_response": None,
         "tool_logs": [],
-        "predicted_style": None,
     }
-
-
-async def classify_node(state: TripPlannerState) -> TripPlannerState:
-    tool_logs = list(state["tool_logs"])
-    response_sections = list(state["response_sections"])
-    tool_registry = state.get("tool_registry")
-    tool_context = state.get("tool_context")
-    travel_profile = state.get("travel_profile")
-    status = state["status"]
-
-    if travel_profile is None:
-        tool_logs.append(
-            {
-                "tool_name": "travel_style_classifier",
-                "input_payload": state["prompt"],
-                "output_payload": (
-                    "Classifier skipped because no structured travel profile was provided."
-                ),
-                "status": "skipped",
-            }
-        )
-        return {"tool_logs": tool_logs}
-
-    if tool_registry is None or tool_context is None:
-        tool_logs.append(
-            {
-                "tool_name": "travel_style_classifier",
-                "input_payload": json.dumps(travel_profile.model_dump()),
-                "output_payload": (
-                    "Classifier could not run because the tool runtime is unavailable."
-                ),
-                "status": "failed",
-            }
-        )
-        response_sections.append(
-            "Travel style classification could not run because the tool runtime is unavailable."
-        )
-        return {
-            "status": "partial",
-            "response_sections": response_sections,
-            "tool_logs": tool_logs,
-        }
-
-    try:
-        prediction = await tool_registry.get("travel_style_classifier").arun(
-            travel_profile,
-            tool_context,
-        )
-        tool_logs.append(
-            {
-                "tool_name": "travel_style_classifier",
-                "input_payload": json.dumps(travel_profile.model_dump()),
-                "output_payload": json.dumps(prediction.model_dump()),
-                "status": "completed",
-            }
-        )
-        response_sections.append(
-            f"Predicted travel style: {prediction.predicted_style}"
-        )
-        return {
-            "predicted_style": prediction.predicted_style,
-            "response_sections": response_sections,
-            "tool_logs": tool_logs,
-        }
-    except Exception as exc:
-        tool_logs.append(
-            {
-                "tool_name": "travel_style_classifier",
-                "input_payload": json.dumps(travel_profile.model_dump()),
-                "output_payload": f"Classifier failed: {type(exc).__name__}: {exc}",
-                "status": "failed",
-            }
-        )
-        response_sections.append("Travel style classification failed during this run.")
-        return {
-            "status": "partial" if status == "completed" else status,
-            "response_sections": response_sections,
-            "tool_logs": tool_logs,
-        }
 
 
 async def extract_request_fields_node(state: TripPlannerState) -> TripPlannerState:
@@ -312,25 +231,13 @@ async def recommend_destinations_node(state: TripPlannerState) -> TripPlannerSta
     tool_registry = state.get("tool_registry")
     tool_context = state.get("tool_context")
     status = state["status"]
-    predicted_style = state.get("predicted_style")
     travel_profile = state.get("travel_profile")
-
-    if predicted_style is None:
-        tool_logs.append(
-            {
-                "tool_name": "destination_recommender",
-                "input_payload": state["prompt"],
-                "output_payload": "Destination recommendation skipped because no predicted travel style was available.",
-                "status": "skipped",
-            }
-        )
-        return {"tool_logs": tool_logs}
 
     if tool_registry is None or tool_context is None:
         tool_logs.append(
             {
                 "tool_name": "destination_recommender",
-                "input_payload": predicted_style,
+                "input_payload": state["prompt"],
                 "output_payload": "Destination recommendation failed because the tool runtime is unavailable.",
                 "status": "failed",
             }
@@ -345,11 +252,9 @@ async def recommend_destinations_node(state: TripPlannerState) -> TripPlannerSta
         }
 
     recommendation_input = DestinationRecommendationRequest(
-        travel_style=predicted_style,
+        query_text=state["prompt"],
         budget_level=travel_profile.budget_level if travel_profile is not None else None,
         region=travel_profile.region if travel_profile is not None else None,
-        has_hiking=travel_profile.has_hiking if travel_profile is not None else None,
-        has_beach=travel_profile.has_beach if travel_profile is not None else None,
         limit=3,
     )
 
@@ -362,7 +267,7 @@ async def recommend_destinations_node(state: TripPlannerState) -> TripPlannerSta
         tool_logs.append(
             {
                 "tool_name": "destination_recommender",
-                "input_payload": json.dumps(recommendation_input.model_dump()),
+                "input_payload": json.dumps(recommendation_input.model_dump(mode="json")),
                 "output_payload": (
                     f"Destination recommendation failed: {type(exc).__name__}: {exc}"
                 ),
@@ -383,7 +288,7 @@ async def recommend_destinations_node(state: TripPlannerState) -> TripPlannerSta
     tool_logs.append(
         {
             "tool_name": "destination_recommender",
-            "input_payload": json.dumps(recommendation_input.model_dump()),
+            "input_payload": json.dumps(recommendation_input.model_dump(mode="json")),
             "output_payload": json.dumps(recommendations.model_dump(mode="json")),
             "status": "completed",
         }
@@ -397,12 +302,10 @@ async def recommend_destinations_node(state: TripPlannerState) -> TripPlannerSta
     if recommended_destinations:
         top_destination = recommended_destinations[0]
         destination_summary = ", ".join(
-            f"{item['destination']} ({item['match_score']})"
+            f"{item['destination']} ({item['score']})"
             for item in recommended_destinations
         )
-        response_sections.append(
-            f"Recommended destinations for style {predicted_style}: {destination_summary}"
-        )
+        response_sections.append(f"Recommended destinations: {destination_summary}")
         selected_destination = (
             state.get("destination_name") or top_destination["destination"]
         )
@@ -422,9 +325,7 @@ async def recommend_destinations_node(state: TripPlannerState) -> TripPlannerSta
             f"Primary recommendation selected for deeper analysis: {selected_destination}"
         )
     else:
-        response_sections.append(
-            f"No destination matches were found for predicted style {predicted_style}."
-        )
+        response_sections.append("No destination matches were found for this request.")
 
     updates["response_sections"] = response_sections
     return updates
@@ -538,14 +439,13 @@ async def live_conditions_node(state: TripPlannerState) -> TripPlannerState:
 
 async def synthesize_response_node(state: TripPlannerState) -> TripPlannerState:
     response_sections = list(state["response_sections"])
-    predicted_style = state.get("predicted_style")
     destination_name = state.get("destination_name")
     recommended_destinations = state.get("recommended_destinations") or []
     tool_context = state.get("tool_context")
 
-    if predicted_style is not None and destination_name is not None:
+    if destination_name is not None:
         response_sections.append(
-            f"Use the predicted style and retrieved context to evaluate {destination_name} for this trip."
+            f"Use the retrieved context to evaluate {destination_name} for this trip."
         )
     if recommended_destinations:
         alternatives = [
@@ -567,7 +467,7 @@ async def synthesize_response_node(state: TripPlannerState) -> TripPlannerState:
             tool_context.http_client,
             tool_context.settings,
             prompt=state["prompt"],
-            predicted_style=predicted_style,
+            predicted_style=None,
             destination_name=destination_name,
             response_sections=response_sections,
             tool_logs=state["tool_logs"],
@@ -592,7 +492,6 @@ def build_trip_planner_graph():
     graph = StateGraph(TripPlannerState)
     graph.add_node("initialize", initialize_trip_state)
     graph.add_node("extract_request_fields", extract_request_fields_node)
-    graph.add_node("classify", classify_node)
     graph.add_node("recommend_destinations", recommend_destinations_node)
     graph.add_node("retrieve_context", retrieve_context_node)
     graph.add_node("live_conditions", live_conditions_node)
@@ -600,8 +499,7 @@ def build_trip_planner_graph():
 
     graph.add_edge(START, "initialize")
     graph.add_edge("initialize", "extract_request_fields")
-    graph.add_edge("extract_request_fields", "classify")
-    graph.add_edge("classify", "recommend_destinations")
+    graph.add_edge("extract_request_fields", "recommend_destinations")
     graph.add_edge("recommend_destinations", "retrieve_context")
     graph.add_edge("retrieve_context", "live_conditions")
     graph.add_edge("live_conditions", "synthesize_response")
