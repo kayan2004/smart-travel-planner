@@ -67,12 +67,12 @@ The current app flow is:
 1. User signs up or logs in.
 2. User enters a natural-language trip request.
 3. Claude-based extraction infers a structured travel profile.
-4. The ML classifier predicts a travel style.
-5. The recommender chooses top matching destinations from the labeled CSV.
-6. The RAG tool retrieves destination context from embedded Wikivoyage documents.
-7. The live conditions tool checks current weather through Open-Meteo.
-8. Claude synthesizes the final answer.
-9. The run is saved to Postgres and posted to Discord.
+4. A structured SQL pre-filter (budget ceiling, region) narrows the `destinations` corpus, then a
+   pgvector cosine re-rank against the prompt's embedding orders the survivors.
+5. The RAG tool retrieves destination context from embedded Wikivoyage documents.
+6. The live conditions tool checks current weather through Open-Meteo.
+7. Claude synthesizes the final answer.
+8. The run is saved to Postgres and posted to Discord.
 
 ## Architecture
 
@@ -83,21 +83,25 @@ flowchart LR
     API --> LG[LangGraph Planner]
 
     LG --> EXTRACT[Prompt Field Extraction]
-    LG --> CLS[ML Travel Style Classifier]
-    LG --> REC[Destination Recommender]
+    LG --> REC[Pre-filter + Cosine Re-rank]
     LG --> RAG[RAG Retrieval Tool]
     LG --> LIVE[Live Conditions Tool]
     LG --> SYN[Claude Final Synthesis]
 
-    CLS --> MODEL[best_model.joblib]
-    REC --> CSV[travel_destinations_labeled.csv]
-    RAG --> PG[(Postgres + pgvector)]
+    REC --> PG[(Postgres + pgvector: destinations)]
+    RAG --> PG2[(Postgres + pgvector: destination_documents)]
     LIVE --> WEATHER[Open-Meteo API]
     SYN --> API
 
     API --> DB[(Postgres)]
     API --> WEBHOOK[Discord Webhook]
 ```
+
+> The SVC travel-style classifier (`artifacts/ml/best_model.joblib`) and the CSV hand-weighted
+> scorer (`app/services/recommendations.py`) have been retired from this path (see
+> `backend/README.md`'s "Destination Recommendation" section). Both files are still on disk and the
+> classifier is still reachable standalone via `POST /tools/classify-travel-style`, but neither is
+> called by the trip-planner graph anymore.
 
 ## Stack
 
@@ -400,20 +404,21 @@ The agent is built with **LangGraph** and runs a structured pipeline rather than
 
 1. Initialize state
 2. Extract request fields
-3. Classify travel style
-4. Recommend destinations
-5. Retrieve destination context
-6. Fetch live conditions
-7. Synthesize final answer
+3. Recommend destinations (structured pre-filter + pgvector cosine re-rank)
+4. Retrieve destination context
+5. Fetch live conditions
+6. Synthesize final answer
 
 ### Tools
 
-Current tool set:
+Current tool set used by the trip-planner graph:
 
-- `travel_style_classifier`
 - `destination_recommender`
 - `destination_context_retriever`
 - `live_conditions`
+
+`travel_style_classifier` remains registered and is reachable standalone via
+`POST /tools/classify-travel-style`, but the graph no longer calls it.
 
 ### Tool Validation
 

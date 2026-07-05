@@ -235,8 +235,9 @@ If your DB has never run this app before (a true fresh DB), just run `uv run ale
 ## Destination Corpus Ingestion (`destinations` table)
 
 A second, richer destination corpus lives alongside the original `travel_destinations_labeled.csv` /
-`destination_documents` RAG table (both left untouched). It is not yet wired into the agent - this
-is the ingestion pipeline only.
+`destination_documents` RAG table (both left untouched). It now **is** wired into the agent - see
+"Destination Recommendation (Pre-filter + Cosine Re-rank)" below for how the trip-planner graph
+queries it.
 
 ### Schema
 
@@ -317,6 +318,51 @@ uv run python scripts/ingest_destinations.py
 
 Re-running is always safe: the upsert key is `(name, country)`, and unchanged `details` skip
 re-embedding entirely via `content_hash`.
+
+## Destination Recommendation (Pre-filter + Cosine Re-rank)
+
+Replaces the earlier SVC travel-style classifier + CSV hand-weighted scorer. Implemented in
+`app/services/destination_recommendations.py`, called by the `destination_recommender` tool
+(`app/agent/tools/recommendations_tool.py`) from a single graph node
+(`recommend_destinations_node` in `app/agent/graph.py`).
+
+1. Embed the raw trip-request prompt with Voyage (`input_type=query`) - not a synthesized
+   structured-field sentence, since destination embeddings were built from Wikivoyage prose in the
+   same embedding space.
+2. Structured SQL pre-filter over `destinations`: budget ceiling (`budget_level <= requested`, OR
+   `NULL` - about 35% of the corpus has no Numbeo coverage and would otherwise be starved out),
+   region (skipped when the extraction prompt's `"Flexible"` sentinel is used), and a dormant
+   required-tags-above-threshold filter (JSONB weight lookup) - inert until clustering Phase 2/3
+   supplies real tag names into `tag_definitions`/`destinations.tags`.
+3. Cosine re-rank via `Destination.embedding.cosine_distance(...)` (`<=>`), ordered and limited in
+   the same SQL statement so `ix_destinations_embedding_hnsw` (`vector_cosine_ops`) is eligible to
+   be used.
+4. If the filtered query returns fewer than `min_candidates` rows, re-run once with every hard
+   constraint dropped (pure cosine rank over the whole corpus) rather than returning an empty
+   slate. The response's `used_relaxed_constraints` flag reports whether this happened.
+
+Each result carries a feature snapshot (`cosine_sim`, `tag_match_count`, `budget_delta`,
+`region_match`) alongside `score`/`rank_position` - shaped for the (still unwired) `recommendations`
+table for a future learning-to-rank feedback loop, not written there yet.
+
+`EXPLAIN ANALYZE` against the real 219-destination corpus:
+
+```
+Limit  (cost=112.47..112.50 rows=10 width=24) (actual time=1.370..1.371 rows=10 loops=1)
+  ->  Sort  (cost=112.47..113.02 rows=219 width=24) (actual time=1.369..1.370 rows=10 loops=1)
+        Sort Key: ((embedding <=> '[...]'::vector))
+        Sort Method: top-N heapsort  Memory: 26kB
+        ->  Seq Scan on destinations  (cost=0.00..107.74 rows=219 width=24) (actual time=0.020..1.331 rows=219 loops=1)
+              Filter: ((deleted_at IS NULL) AND (embedding IS NOT NULL))
+Planning Time: 0.191 ms
+Execution Time: 1.404 ms
+```
+
+At only 219 rows, the Postgres planner chose a sequential scan on `destinations` followed by an
+in-memory top-N heapsort, rather than using the HNSW index (`ix_destinations_embedding_hnsw`). This
+is the genuinely correct choice for a table this small: a full sequential scan (~112 cost units,
+~1.4ms total) is faster than the overhead of seeking through an index structure. The HNSW index
+becomes more valuable as the corpus grows; at this size, a seq scan + sort is optimal.
 
 ### Data-quality report
 
