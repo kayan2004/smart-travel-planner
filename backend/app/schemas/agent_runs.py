@@ -3,6 +3,7 @@ from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.schemas.classifier import TravelStylePredictionRequest
+from app.schemas.recommendation_read import RecommendationRead
 from app.schemas.tool_logs import ToolLogRead
 
 
@@ -23,5 +24,6 @@ class AgentRunRead(BaseModel):
     status: str
     created_at: datetime
     tool_logs: list[ToolLogRead] = []
+    recommendations: list[RecommendationRead] = []
 
     model_config = ConfigDict(from_attributes=True)

@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Any
 
 from app.agent.graph import build_trip_planner_graph
 from app.agent.tools.base import ToolContext
@@ -19,6 +20,7 @@ class PlannerResult:
     status: str
     response: str
     tool_logs: list[ToolExecutionRecord]
+    recommended_destinations: list[dict[str, Any]]
 
 
 async def run_trip_planner(
@@ -55,4 +57,5 @@ async def run_trip_planner(
             )
             for tool_log in final_state["tool_logs"]
         ],
+        recommended_destinations=list(final_state.get("recommended_destinations") or []),
     )

@@ -5,7 +5,9 @@ from app.api.dependencies.auth import get_current_user
 from app.db.dependencies import get_db_session
 from app.db.models.user import User
 from app.schemas.agent_runs import AgentRunCreate, AgentRunRead
+from app.schemas.tool_logs import ToolLogRead
 from app.services.agent_runs import create_agent_run
+from app.services.recommendation_persistence import get_recommendations_for_agent_run
 from app.agent.tools.base import ToolContext
 
 router = APIRouter(prefix="/agent-runs", tags=["agent-runs"])
@@ -33,4 +35,14 @@ async def create_agent_run_route(
         tool_registry=tool_registry,
         tool_context=tool_context,
     )
-    return AgentRunRead.model_validate(agent_run)
+    recommendations = await get_recommendations_for_agent_run(session, agent_run.id)
+    return AgentRunRead(
+        id=agent_run.id,
+        user_id=agent_run.user_id,
+        prompt=agent_run.prompt,
+        response=agent_run.response,
+        status=agent_run.status,
+        created_at=agent_run.created_at,
+        tool_logs=[ToolLogRead.model_validate(log) for log in agent_run.tool_logs],
+        recommendations=recommendations,
+    )
