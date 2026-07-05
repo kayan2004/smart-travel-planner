@@ -1,5 +1,7 @@
 import type {
   AgentRunRead,
+  FeedbackRead,
+  FeedbackVerdict,
   PlannerRequest,
   TokenResponse,
   UserRead,
@@ -81,6 +83,17 @@ export async function createAgentRun(
   return request<AgentRunRead>('/agent-runs', {
     method: 'POST',
     token,
+    body: payload,
+  })
+}
+
+export async function submitFeedback(payload: {
+  recommendation_id: number
+  session_uuid: string
+  verdict: FeedbackVerdict
+}): Promise<FeedbackRead> {
+  return request<FeedbackRead>('/feedback', {
+    method: 'POST',
     body: payload,
   })
 }

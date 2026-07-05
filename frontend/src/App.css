@@ -333,6 +333,32 @@ button:focus {
   font-weight: 700;
 }
 
+.feedback-actions {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 0.85rem;
+}
+
+.feedback-button {
+  border: 1px solid rgba(32, 51, 55, 0.18);
+  background: transparent;
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.feedback-button-active-up {
+  background: rgba(70, 118, 121, 0.18);
+  border-color: rgba(70, 118, 121, 0.45);
+}
+
+.feedback-button-active-down {
+  background: rgba(190, 90, 70, 0.16);
+  border-color: rgba(190, 90, 70, 0.45);
+}
+
 details {
   margin-top: 0.85rem;
 }

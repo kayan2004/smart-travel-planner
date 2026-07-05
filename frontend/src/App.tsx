@@ -8,14 +8,26 @@ import {
   fetchCurrentUser,
   login,
   signup,
+  submitFeedback,
 } from './lib/api'
-import type { AgentRunRead, AuthMode, SessionState } from './types'
+import type { AgentRunRead, AuthMode, FeedbackVerdict, SessionState } from './types'
 
 type View = 'login' | 'signup' | 'app'
 
 const APP_ROUTE = '/app'
 const LOGIN_ROUTE = '/login'
 const SIGNUP_ROUTE = '/signup'
+const FEEDBACK_SESSION_STORAGE_KEY = 'smart-travel-feedback-session-uuid'
+
+function getOrCreateFeedbackSessionUuid(): string {
+  const existing = window.localStorage.getItem(FEEDBACK_SESSION_STORAGE_KEY)
+  if (existing) {
+    return existing
+  }
+  const created = crypto.randomUUID()
+  window.localStorage.setItem(FEEDBACK_SESSION_STORAGE_KEY, created)
+  return created
+}
 
 function getViewFromPath(pathname: string): View {
   if (pathname === SIGNUP_ROUTE) {
@@ -72,6 +84,11 @@ function App() {
   const [plannerError, setPlannerError] = useState('')
   const [authPending, setAuthPending] = useState(false)
   const [plannerPending, setPlannerPending] = useState(false)
+  const [feedbackSessionUuid] = useState(getOrCreateFeedbackSessionUuid)
+  const [feedbackByRecommendation, setFeedbackByRecommendation] = useState<
+    Record<number, FeedbackVerdict>
+  >({})
+  const [feedbackError, setFeedbackError] = useState('')
 
   const authMode: AuthMode = view === 'signup' ? 'signup' : 'login'
 
@@ -187,6 +204,26 @@ function App() {
       )
     } finally {
       setPlannerPending(false)
+    }
+  }
+
+  async function handleFeedback(recommendationId: number, verdict: FeedbackVerdict) {
+    setFeedbackError('')
+
+    try {
+      await submitFeedback({
+        recommendation_id: recommendationId,
+        session_uuid: feedbackSessionUuid,
+        verdict,
+      })
+      setFeedbackByRecommendation((previous) => ({
+        ...previous,
+        [recommendationId]: verdict,
+      }))
+    } catch (error) {
+      setFeedbackError(
+        error instanceof ApiError ? error.message : 'Feedback could not be submitted.',
+      )
     }
   }
 
@@ -363,6 +400,69 @@ function App() {
             <p className="empty-state">
               Your first successful agent run will show up here with the final
               saved answer from the backend.
+            </p>
+          )}
+        </article>
+
+        <article className="panel recommendations-panel">
+          <div className="panel-heading">
+            <div>
+              <p className="panel-label">Recommendations</p>
+              <h2>Rate the ranked slate</h2>
+            </div>
+            <span className="status-pill">
+              {result ? `${result.recommendations.length} destinations` : 'No slate yet'}
+            </span>
+          </div>
+
+          {feedbackError ? <p className="error-text">{feedbackError}</p> : null}
+
+          {result?.recommendations.length ? (
+            <div className="logs-list">
+              {result.recommendations.map((recommendation) => {
+                const activeVerdict = feedbackByRecommendation[recommendation.id]
+                return (
+                  <article key={recommendation.id} className="log-card">
+                    <div className="log-header">
+                      <strong>
+                        #{recommendation.rank_position} {recommendation.destination_name}, {recommendation.country}
+                      </strong>
+                      <span className="log-status">{recommendation.score.toFixed(4)}</span>
+                    </div>
+                    <div className="feedback-actions">
+                      <button
+                        type="button"
+                        className={
+                          activeVerdict === 1
+                            ? 'feedback-button feedback-button-active-up'
+                            : 'feedback-button'
+                        }
+                        aria-pressed={activeVerdict === 1}
+                        onClick={() => handleFeedback(recommendation.id, 1)}
+                      >
+                        Good match
+                      </button>
+                      <button
+                        type="button"
+                        className={
+                          activeVerdict === -1
+                            ? 'feedback-button feedback-button-active-down'
+                            : 'feedback-button'
+                        }
+                        aria-pressed={activeVerdict === -1}
+                        onClick={() => handleFeedback(recommendation.id, -1)}
+                      >
+                        Not a fit
+                      </button>
+                    </div>
+                  </article>
+                )
+              })}
+            </div>
+          ) : (
+            <p className="empty-state">
+              Recommended destinations will appear here after a planner run, so
+              you can rate each ranked result.
             </p>
           )}
         </article>

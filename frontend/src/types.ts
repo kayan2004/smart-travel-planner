@@ -28,6 +28,35 @@ export interface ToolLogRead {
   created_at: string
 }
 
+export interface RecommendationFeatures {
+  cosine_sim: number
+  tag_match_count: number
+  budget_delta: number | null
+  region_match: boolean
+}
+
+export interface RecommendationRead {
+  id: number
+  destination_id: string
+  destination_name: string
+  country: string
+  rank_position: number
+  score: number
+  features: RecommendationFeatures
+  created_at: string
+}
+
+export type FeedbackVerdict = 1 | -1
+
+export interface FeedbackRead {
+  id: number
+  recommendation_id: number
+  session_uuid: string
+  verdict: FeedbackVerdict
+  channel: string
+  created_at: string
+}
+
 export interface AgentRunRead {
   id: number
   user_id: number
@@ -36,6 +65,7 @@ export interface AgentRunRead {
   status: string
   created_at: string
   tool_logs: ToolLogRead[]
+  recommendations: RecommendationRead[]
 }
 
 export interface SessionState {
