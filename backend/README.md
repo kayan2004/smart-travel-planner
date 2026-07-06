@@ -710,32 +710,36 @@ All three LLM call sites (field extraction, trip synthesis, offline cluster nami
 The interface is a single method:
 
 ```python
-async def complete(self, messages: list[Message], model_tier: ModelTier, **opts: object) -> str: ...
+async def complete(self, messages: list[Message], **opts: object) -> str: ...
 ```
 
-`messages` is a list of `{"role": "system" | "user", "content": str}` dicts; `model_tier` is the
-literal `"fast"` or `"strong"` - each provider maps that tier to its own configured model name
-internally, so callers never reference a concrete model string. `**opts` lets a call site override
-`max_tokens`/`temperature` for that one call (`extract_request_fields` and `propose_cluster_tag`
-both do this; `synthesize_trip_response` doesn't, and falls back to the provider's configured
-defaults). `app/services/llm.py`'s three orchestration functions (`extract_request_fields`,
-`synthesize_trip_response`, `propose_cluster_tag`) only depend on this protocol, never on a
-specific provider's SDK or wire format.
+`messages` is a list of `{"role": "system" | "user", "content": str}` dicts. `**opts` lets a call
+site override `max_tokens`/`temperature` for that one call (`extract_request_fields` and
+`propose_cluster_tag` both do this; `synthesize_trip_response` doesn't, and falls back to the
+provider's configured defaults). `app/services/llm.py`'s three orchestration functions
+(`extract_request_fields`, `synthesize_trip_response`, `propose_cluster_tag`) only depend on this
+protocol, never on a specific provider's SDK or wire format.
+
+**No fast/strong model tiers** (removed 2026-07-06 - `ModelTier`, `choose_model()`,
+`fast_model_name()`/`strong_model_name()`/`resolve_model_name()` all deleted). Each provider always
+uses one single configured model (`gemini_model` / `anthropic_model` in `Settings`) for every call
+site. This was a deliberate simplification, not an oversight: the two-tier routing existed to send
+cheap/high-volume calls (extraction) to a fast model and quality-sensitive calls (synthesis,
+naming) to a stronger one, but the "strong" side of that split (`gemini-3.1-pro`) turned out to be
+a broken model string - it doesn't exist as a callable model at all (confirmed via
+`client.models.list()` - only `gemini-3.1-pro-preview` does) - and separately, the real
+Gemini-branded models require a paid prepay balance once billing is enabled on the project, while
+Gemma models are served for free through the same API. Rather than juggling two tiers across two
+different billing/availability situations, `gemini_model` is pinned to a single free Gemma 4 model
+for now. See "Gemini (default provider)" below for the full live-testing story.
 
 ### Why an abstraction at all (lock-in, cost)
 
-Two vendor-specific pain points motivated this, both hit in earlier sessions on this project:
-
-- **Provider lock-in risk.** The Anthropic API key on this project ran out of credit mid-session
-  (see `.claude/memory/` for the incident) with no fallback - every LLM call in the app failed at
-  once. A second, independently-billed provider behind the same interface means a billing problem
-  with one vendor doesn't take down request field extraction and trip synthesis together.
-- **Cost/latency tuning per tier, not per vendor.** The existing fast/strong model-tier split
-  (`choose_model()` in `app/services/llm.py`) already routes cheap, high-volume calls (extraction)
-  and expensive, quality-sensitive calls (synthesis, cluster naming) differently. Keeping that
-  routing at the tier level - not hardcoded model names - means swapping the underlying vendor
-  entirely (this session: Anthropic → Gemini as the default) is a config change, not a rewrite of
-  the routing logic.
+The **provider abstraction** itself (not the tiering, which is gone) is still motivated by a real
+incident from an earlier session: the Anthropic API key on this project ran out of credit
+mid-session (see `.claude/memory/` for the incident) with no fallback - every LLM call in the app
+failed at once. A second, independently-billed provider behind the same interface means a billing
+problem with one vendor doesn't take down request field extraction and trip synthesis together.
 
 `LLM_PROVIDER` (`anthropic` or `gemini`, **default `gemini`**) is one global switch - it is not a
 per-call-site setting and there is no automatic fallback between providers. Set both providers'
@@ -750,12 +754,11 @@ Set one env var and restart - no code changes:
 LLM_PROVIDER=gemini     # or: anthropic
 ```
 
-Everything else (`GEMINI_FAST_MODEL`/`GEMINI_STRONG_MODEL` vs `ANTHROPIC_FAST_MODEL`/
-`ANTHROPIC_STRONG_MODEL`, per-provider `_MAX_TOKENS`/`_TEMPERATURE`) is already configured for
-both providers side by side in `.env`/`.env.example`, so the inactive provider's settings just sit
-unused rather than needing to be added when you switch.
+Everything else (`GEMINI_MODEL` vs `ANTHROPIC_MODEL`, per-provider `_MAX_TOKENS`/`_TEMPERATURE`) is
+already configured for both providers side by side in `.env`/`.env.example`, so the inactive
+provider's settings just sit unused rather than needing to be added when you switch.
 
-### Gemini (default provider)
+### Gemini (default provider) - currently pinned to Gemma 4, live-verified working
 
 Implemented in `app/services/llm_providers/gemini_provider.py` using the official
 [`google-genai`](https://pypi.org/project/google-genai/) Python SDK (`client.aio.models.generate_content`)
@@ -764,20 +767,41 @@ rather than raw REST. Configure:
 ```
 LLM_PROVIDER=gemini
 GEMINI_API_KEY=...
-GEMINI_FAST_MODEL=gemini-3.1-flash-lite   # extraction - cheap, high-volume
-GEMINI_STRONG_MODEL=gemini-3.1-pro        # synthesis, cluster naming - quality-sensitive
+GEMINI_MODEL=gemma-4-26b-a4b-it   # free tier - see below for why this, not a gemini-3.1-* model
 ```
 
 Generate a **restricted** API key (scoped to the Generative Language API) at
 [Google AI Studio](https://aistudio.google.com/apikey) - Google is phasing out unrestricted
 Gemini API keys during 2026 (restricted keys work until September 2026; after that, only
-service-account-bound auth keys are accepted). **The key's Google Cloud project also needs the
-Generative Language API enabled** - a key that syntactically works but belongs to a project where
-the API was never turned on fails with `403 PERMISSION_DENIED (SERVICE_DISABLED)` at call time, not
-at key-creation time. Confirmed hitting this live during the switchover - graceful degradation
-(see `app/agent/graph.py`'s per-node `try/except`) caught it and the run still completed with
-`status="partial"`, but no successful live Gemini call has been verified yet in this environment;
-that's a one-click fix in Google Cloud Console, not a code issue.
+service-account-bound auth keys are accepted).
+
+**Live-testing story (2026-07-06), in the order it actually happened - useful if you hit any of
+these again:**
+1. `403 PERMISSION_DENIED (SERVICE_DISABLED)` - the key's Google Cloud project never had the
+   Generative Language API enabled. Fixed by enabling it in Cloud Console (a project-level
+   setting, not a key-level one).
+2. `403 PERMISSION_DENIED (API_KEY_SERVICE_BLOCKED)` - a *different* 403, after the project-level
+   API was enabled: the key itself had an API restriction not including the Generative Language
+   API. Fixed on the key's own "API restrictions" list in Cloud Console.
+3. `429 RESOURCE_EXHAUSTED` ("Your prepayment credits are depleted") on `gemini-3.1-flash-lite` -
+   this is a *third*, separate system from the rate-limit quota counters (RPM/TPM/RPD) shown on
+   the AI Studio usage page: a prepay dollar balance that gets debited per token on every call to a
+   Gemini-branded model, independent of whether you're anywhere near your quota ceiling. Adding
+   prepay credits fixed it - confirmed live success on `gemini-3.1-flash-lite`,
+   `gemini-3.1-pro-preview`, `gemini-2.5-flash`, `gemini-2.5-pro`, and others once credits landed.
+4. **Gemma models never hit any of the above** - confirmed live success on `gemma-4-26b-a4b-it`/
+   `gemma-4-31b-it` *while* the Gemini-branded models were still blocked on step 3's billing wall.
+   That's the evidence `gemma-4-26b-a4b-it` is genuinely free, not just cheap.
+5. `gemini_strong_model`'s old default, `gemini-3.1-pro`, was independently confirmed to be a
+   **nonexistent model string** (`404 NOT_FOUND`) via `client.models.list()` - the real model is
+   `gemini-3.1-pro-preview`. Moot now that tiers are gone, but worth knowing if `GEMINI_MODEL` is
+   ever pointed back at a `gemini-3.1-*` model by name.
+
+So: live Gemini API calls **are** confirmed working now (both Gemma and Gemini-branded models) -
+this supersedes an earlier version of this doc that said no live call had been verified yet.
+`GEMINI_MODEL` stays pinned to the free Gemma model so running this app doesn't silently spend
+money; switching to a `gemini-3.1-*` model is a one-line config change once billing is set up the
+way you want it.
 
 **Transport tradeoff, deliberately accepted:** every other HTTP call in this app reuses one shared
 `httpx.AsyncClient` from `app/core/lifespan.py` (see `CLAUDE.md`'s async conventions). The
@@ -795,14 +819,13 @@ Implemented in `app/services/llm_providers/anthropic_provider.py` via plain REST
 ```
 LLM_PROVIDER=anthropic
 ANTHROPIC_API_KEY=...
-ANTHROPIC_FAST_MODEL=claude-haiku-4-5
-ANTHROPIC_STRONG_MODEL=claude-sonnet-4-5
+ANTHROPIC_MODEL=claude-haiku-4-5
 ```
 
 ### Adding a third provider
 
 Implement the `LLMProvider` protocol (`app/services/llm_providers/protocol.py`) as a new module in
 `app/services/llm_providers/` - one `complete()` method translating the provider-agnostic
-`messages`/`model_tier` call into that provider's own request shape - and add it to
-`get_llm_provider()`'s dispatch (`app/services/llm_providers/factory.py`). `app/services/llm.py`'s
-three orchestration functions need no changes.
+`messages` call into that provider's own request shape - and add it to `get_llm_provider()`'s
+dispatch (`app/services/llm_providers/factory.py`). `app/services/llm.py`'s three orchestration
+functions need no changes.

@@ -5,6 +5,9 @@ which doesn't go through httpx at all, so its client method is patched
 directly instead (same technique used for live-Gemini-blocked verification
 in an earlier session - see backend/README.md's "Provider-Agnostic LLM
 Layer" section).
+
+No fast/strong model tiers anymore (removed 2026-07-06) - complete() takes
+no tier argument, each provider always uses its single configured model.
 """
 
 import json
@@ -46,7 +49,6 @@ async def test_anthropic_provider_builds_correct_request_and_parses_response():
                 {"role": "system", "content": "You are a helpful assistant."},
                 {"role": "user", "content": "Say hi."},
             ],
-            "fast",
         )
 
     assert result == "hello from anthropic"
@@ -54,23 +56,23 @@ async def test_anthropic_provider_builds_correct_request_and_parses_response():
     assert request.url.path == "/v1/messages"
     assert request.headers["x-api-key"] == "test-key"
     body = json.loads(request.content)
-    assert body["model"] == settings.anthropic_fast_model
+    assert body["model"] == settings.anthropic_model
     assert body["system"] == "You are a helpful assistant."
     assert body["messages"] == [{"role": "user", "content": "Say hi."}]
 
 
 @pytest.mark.asyncio(loop_scope="session")
-async def test_anthropic_provider_uses_strong_model_for_strong_tier():
-    settings = Settings(anthropic_api_key="test-key")
+async def test_anthropic_provider_uses_the_single_configured_model():
+    settings = Settings(anthropic_api_key="test-key", anthropic_model="claude-custom-test-model")
     transport = _anthropic_mock_transport()
 
     async with httpx.AsyncClient(transport=transport) as client:
         provider = AnthropicProvider(settings, http_client=client)
-        await provider.complete([{"role": "user", "content": "hi"}], "strong")
+        await provider.complete([{"role": "user", "content": "hi"}])
 
     request = transport.captured_requests[0]  # type: ignore[attr-defined]
     body = json.loads(request.content)
-    assert body["model"] == settings.anthropic_strong_model
+    assert body["model"] == "claude-custom-test-model"
 
 
 @pytest.mark.asyncio(loop_scope="session")
@@ -83,11 +85,11 @@ async def test_gemini_provider_parses_response_text():
         provider._client.aio.models, "generate_content", new_callable=AsyncMock
     ) as mock_generate:
         mock_generate.return_value = fake_response
-        result = await provider.complete([{"role": "user", "content": "hi"}], "fast")
+        result = await provider.complete([{"role": "user", "content": "hi"}])
 
     assert result == "hello from gemini"
     _, call_kwargs = mock_generate.call_args
-    assert call_kwargs["model"] == settings.gemini_fast_model
+    assert call_kwargs["model"] == settings.gemini_model
 
 
 @pytest.mark.asyncio(loop_scope="session")

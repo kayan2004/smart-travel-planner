@@ -2,7 +2,7 @@ import httpx
 
 from app.core.config import Settings
 from app.services.llm_providers.errors import raise_for_status_with_body
-from app.services.llm_providers.protocol import Message, ModelTier, split_system_and_user
+from app.services.llm_providers.protocol import Message, split_system_and_user
 
 
 class AnthropicProvider:
@@ -18,18 +18,13 @@ class AnthropicProvider:
     async def complete(
         self,
         messages: list[Message],
-        model_tier: ModelTier,
         **opts: object,
     ) -> str:
         settings = self._settings
         if not settings.anthropic_api_key:
             raise RuntimeError("Anthropic API key is not configured.")
 
-        model = (
-            settings.anthropic_strong_model
-            if model_tier == "strong"
-            else settings.anthropic_fast_model
-        )
+        model = settings.anthropic_model
         max_tokens = opts.get("max_tokens", settings.anthropic_max_tokens)
         temperature = opts.get("temperature", settings.anthropic_temperature)
         system, user_content = split_system_and_user(messages)

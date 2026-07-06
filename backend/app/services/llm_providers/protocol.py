@@ -1,7 +1,5 @@
 from typing import Literal, Protocol, TypedDict
 
-ModelTier = Literal["fast", "strong"]
-
 
 class Message(TypedDict):
     role: Literal["system", "user"]
@@ -12,7 +10,6 @@ class LLMProvider(Protocol):
     async def complete(
         self,
         messages: list[Message],
-        model_tier: ModelTier,
         **opts: object,
     ) -> str: ...
 

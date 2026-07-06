@@ -38,16 +38,21 @@ class Settings(BaseSettings):
     anthropic_api_key: str = ""
     anthropic_api_base_url: str = "https://api.anthropic.com"
     anthropic_api_version: str = "2023-06-01"
-    anthropic_fast_model: str = "claude-3-5-haiku-latest"
-    anthropic_strong_model: str = "claude-sonnet-4-5"
+    # No fast/strong tiers - removed entirely (2026-07-06) in favor of a single
+    # configured model per provider. Kept on the cheaper default since this
+    # provider is dormant while LLM_PROVIDER=gemini.
+    anthropic_model: str = "claude-3-5-haiku-latest"
     anthropic_max_tokens: int = 700
     anthropic_temperature: float = 0.2
     gemini_api_key: str = ""
     # No base_url/version settings here - the google-genai SDK resolves the
     # Gemini Developer API endpoint itself; unlike AnthropicProvider (plain
     # REST), there's no wire-level detail for us to configure.
-    gemini_fast_model: str = "gemini-3.1-flash-lite"
-    gemini_strong_model: str = "gemini-3.1-pro"
+    # Gemma 4 (free tier), not a Gemini-branded model - deliberate, temporary
+    # choice (2026-07-06) while the billing/prepay setup on the Gemini-branded
+    # models (gemini-3.1-*) gets sorted out. Single model, no fast/strong
+    # tiers - see backend/README.md's "Provider-Agnostic LLM Layer" section.
+    gemini_model: str = "gemma-4-26b-a4b-it"
     gemini_max_tokens: int = 700
     gemini_temperature: float = 0.2
     # Off by default: the shipped model (if any) is trained on a synthetic

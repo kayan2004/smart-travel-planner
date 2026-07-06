@@ -9,10 +9,8 @@ from app.schemas.claude import (
     ExtractionTestResponse,
 )
 from app.services.llm import (
-    choose_model,
     extract_request_fields,
-    fast_model_name,
-    resolve_model_name,
+    model_name,
     synthesize_trip_response,
 )
 
@@ -37,13 +35,7 @@ async def test_claude_route(
         )
 
     settings = request.app.state.settings
-    model_tier = choose_model(
-        settings,
-        prompt=payload.prompt,
-        response_sections=payload.response_sections,
-        tool_logs=payload.tool_logs,
-    )
-    selected_model = resolve_model_name(settings, model_tier)
+    selected_model = model_name(settings)
     generated_text = await synthesize_trip_response(
         http_client,
         settings,
@@ -85,6 +77,6 @@ async def test_extraction_route(
     )
 
     return ExtractionTestResponse(
-        selected_model=fast_model_name(settings),
+        selected_model=model_name(settings),
         extracted_fields=extracted_fields,
     )

@@ -9,7 +9,7 @@ from app.core.config import Settings
 from app.schemas.classifier import TravelStylePredictionRequest
 from app.schemas.claude import ExtractedRequestFields
 from app.schemas.clustering import ClusterNamingProposal
-from app.services.llm_providers import Message, ModelTier, get_llm_provider, raise_for_status_with_body
+from app.services.llm_providers import Message, get_llm_provider, raise_for_status_with_body
 import httpx
 
 PROMPTS_DIR = Path(__file__).resolve().parents[1] / "prompts"
@@ -37,39 +37,13 @@ async def list_anthropic_models(
     return response.json()
 
 
-def fast_model_name(settings: Settings) -> str:
+def model_name(settings: Settings) -> str:
+    """The single configured model for the active provider - no more
+    fast/strong tiers (removed 2026-07-06 in favor of always using the free
+    Gemma 4 model for Gemini, at least for now)."""
     if settings.llm_provider == "gemini":
-        return settings.gemini_fast_model
-    return settings.anthropic_fast_model
-
-
-def strong_model_name(settings: Settings) -> str:
-    if settings.llm_provider == "gemini":
-        return settings.gemini_strong_model
-    return settings.anthropic_strong_model
-
-
-def resolve_model_name(settings: Settings, model_tier: ModelTier) -> str:
-    return strong_model_name(settings) if model_tier == "strong" else fast_model_name(settings)
-
-
-def choose_model(
-    settings: Settings,
-    *,
-    prompt: str,
-    response_sections: list[str],
-    tool_logs: list[dict[str, str]],
-) -> ModelTier:
-    failed_tools = sum(1 for tool_log in tool_logs if tool_log["status"] == "failed")
-    long_prompt = len(prompt) > 220
-    rich_context = len(response_sections) >= 4
-    verbose_tool_payloads = any(
-        len(tool_log["output_payload"]) > 800 for tool_log in tool_logs
-    )
-
-    if failed_tools > 0 or long_prompt or rich_context or verbose_tool_payloads:
-        return "strong"
-    return "fast"
+        return settings.gemini_model
+    return settings.anthropic_model
 
 
 async def extract_request_fields(
@@ -91,7 +65,7 @@ async def extract_request_fields(
         },
         {"role": "user", "content": _build_request_field_extraction_prompt(prompt)},
     ]
-    final_text = await provider.complete(messages, "fast", max_tokens=500, temperature=0.0)
+    final_text = await provider.complete(messages, max_tokens=500, temperature=0.0)
 
     if not final_text:
         raise RuntimeError("The LLM returned an empty extraction response.")
@@ -136,13 +110,6 @@ async def synthesize_trip_response(
     if destination_name is not None:
         context_lines.append(f"Destination under discussion: {destination_name}")
 
-    model_tier = choose_model(
-        settings,
-        prompt=prompt,
-        response_sections=response_sections,
-        tool_logs=tool_logs,
-    )
-
     provider = get_llm_provider(settings, http_client=http_client)
     messages: list[Message] = [
         {
@@ -162,7 +129,7 @@ async def synthesize_trip_response(
             ),
         },
     ]
-    final_text = await provider.complete(messages, model_tier)
+    final_text = await provider.complete(messages)
 
     if not final_text:
         raise RuntimeError("The LLM returned an empty response.")
@@ -181,9 +148,8 @@ async def propose_cluster_tag(
     """Ask the configured LLM provider to name one HDBSCAN destination cluster.
 
     Used offline by scripts/cluster_destinations.py, never on the request
-    path - always the strong model (naming quality matters more than
-    latency/cost here, and this runs a handful of times per corpus, not
-    per-request).
+    path. Uses the provider's single configured model, same as every other
+    call site - no more fast/strong tiers (removed 2026-07-06).
     """
     examples_block = "\n".join(
         f"- {entry.get('name')}, {entry.get('country')} "
@@ -219,7 +185,7 @@ async def propose_cluster_tag(
             ),
         },
     ]
-    final_text = await provider.complete(messages, "strong", max_tokens=400, temperature=0.2)
+    final_text = await provider.complete(messages, max_tokens=400, temperature=0.2)
 
     if not final_text:
         raise RuntimeError(f"The LLM returned an empty naming response for cluster {cluster_id}.")

@@ -4,7 +4,7 @@ from google import genai
 from google.genai import types
 
 from app.core.config import Settings
-from app.services.llm_providers.protocol import Message, ModelTier, split_system_and_user
+from app.services.llm_providers.protocol import Message, split_system_and_user
 
 
 @lru_cache(maxsize=1)
@@ -31,15 +31,10 @@ class GeminiProvider:
     async def complete(
         self,
         messages: list[Message],
-        model_tier: ModelTier,
         **opts: object,
     ) -> str:
         settings = self._settings
-        model = (
-            settings.gemini_strong_model
-            if model_tier == "strong"
-            else settings.gemini_fast_model
-        )
+        model = settings.gemini_model
         max_tokens = opts.get("max_tokens", settings.gemini_max_tokens)
         temperature = opts.get("temperature", settings.gemini_temperature)
         system, user_content = split_system_and_user(messages)
