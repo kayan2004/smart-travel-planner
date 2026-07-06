@@ -613,6 +613,14 @@ graph node. Requires the corpus to already be ingested with embeddings (see "Des
 Ingestion" above) - **aborts if fewer than 50 destinations have a non-null embedding**, since
 HDBSCAN is meaningless on a tiny corpus.
 
+**All three phases have now actually been run against the real corpus (2026-07-06)**: 5 clusters
+named and applied - "South American Cultural Heritage", "European Architectural Heritage", "Asian
+Cultural Heritage", "Oceania Cultural Heritage", "Dynamic Urban Metropolises". `tag_definitions`
+has 5 real rows and `destinations.tags` holds real tag-name keys, not the raw `cluster_id`
+placeholders it held before. This was blocked for a while on the LLM provider being unavailable
+(Anthropic out of credit, then Gemini billing/model-name issues - see "Provider-Agnostic LLM
+Layer" below) and unblocked once that was sorted out.
+
 ### Why this approach
 
 - **Cosine geometry, L2-normalized.** Retrieval elsewhere in this project (RAG, destination
@@ -651,7 +659,8 @@ HDBSCAN is meaningless on a tiny corpus.
 # destinations.tags, write all artifacts/clustering/ outputs.
 uv run python scripts/cluster_destinations.py cluster
 
-# Phase 2: ask Claude (ANTHROPIC_STRONG_MODEL) to propose a tag_name +
+# Phase 2: ask the configured LLM provider (see "Provider-Agnostic LLM
+# Layer" below - Gemini/Gemma 4 by default) to propose a tag_name +
 # description per cluster from artifacts/clustering/ (no re-clustering).
 # Upserts into tag_definitions - re-run any time to regenerate proposals.
 uv run python scripts/cluster_destinations.py name
