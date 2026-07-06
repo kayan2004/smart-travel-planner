@@ -1,6 +1,6 @@
 {
-  "model_version": "bootstrap-20260706102409",
-  "trained_at": "2026-07-06T10:24:09.662804+00:00",
+  "model_version": "bootstrap-20260706102855",
+  "trained_at": "2026-07-06T10:28:55.748352+00:00",
   "dataset_source": "bootstrap",
   "dataset_path": "C:\\Users\\Kayan\\OneDrive\\Desktop\\projects\\sef_projects\\smart_travel_assistant\\backend\\artifacts\\ranker\\bootstrap_dataset.csv",
   "feature_names": [

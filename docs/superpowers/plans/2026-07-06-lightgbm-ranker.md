@@ -1017,6 +1017,23 @@ from app.db.models.feedback import Feedback
 from app.db.models.recommendation import Recommendation
 ```
 
+`Recommendation`/`AgentRun` have `relationship(...)` targets (`AgentRun`, `User`, `ToolLog`, ...) resolved by class name lazily, on first query - every model on `app.db.base.Base` needs to have been imported somewhere first for that lookup to succeed, or SQLAlchemy raises `InvalidRequestError: ... failed to locate a name (...)`. This surfaced incrementally (fixing `AgentRun` revealed `User`, fixing `User` revealed `ToolLog`) until every model was imported. `alembic/env.py` already solved this exact problem for autogenerate - follow its pattern and import every model module for the registration side effect:
+
+```python
+# Registers every ORM model's mapper before any query touches Recommendation
+# or AgentRun - their relationship() targets are resolved by class name
+# lazily, on first query, and every model on app.db.base.Base needs to have
+# been imported somewhere first for that lookup to succeed (same pattern
+# alembic/env.py uses for autogenerate).
+from app.db.models import agent_run  # noqa: F401
+from app.db.models import destination_document  # noqa: F401
+from app.db.models import feedback  # noqa: F401
+from app.db.models import recommendation  # noqa: F401
+from app.db.models import tag_definition  # noqa: F401
+from app.db.models import tool_log  # noqa: F401
+from app.db.models import user  # noqa: F401
+```
+
 Add next to `MODEL_METADATA_PATH`:
 
 ```python

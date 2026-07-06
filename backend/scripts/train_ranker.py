@@ -39,6 +39,18 @@ if str(BACKEND_DIR) not in sys.path:
 
 from app.core.config import get_settings
 from app.db.session import create_db_engine, create_session_factory
+# Registers every ORM model's mapper before any query touches Recommendation
+# or AgentRun - their relationship() targets are resolved by class name
+# lazily, on first query, and every model on app.db.base.Base needs to have
+# been imported somewhere first for that lookup to succeed (same pattern
+# alembic/env.py uses for autogenerate).
+from app.db.models import agent_run  # noqa: F401
+from app.db.models import destination_document  # noqa: F401
+from app.db.models import feedback  # noqa: F401
+from app.db.models import recommendation  # noqa: F401
+from app.db.models import tag_definition  # noqa: F401
+from app.db.models import tool_log  # noqa: F401
+from app.db.models import user  # noqa: F401
 from app.db.models.destination import Destination
 from app.db.models.feedback import Feedback
 from app.db.models.recommendation import Recommendation
