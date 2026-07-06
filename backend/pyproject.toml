@@ -26,6 +26,7 @@ dependencies = [
     "umap-learn>=0.5.7",
     "hdbscan>=0.8.40",
     "google-genai>=2.10.0",
+    "lightgbm==4.6.0",
 ]
 
 [dependency-groups]
