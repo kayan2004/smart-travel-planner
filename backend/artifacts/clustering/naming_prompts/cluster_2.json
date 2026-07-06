@@ -1,0 +1,82 @@
+{
+  "cluster_id": 2,
+  "example_destinations": [
+    {
+      "name": "Varanasi",
+      "country": "India",
+      "region": "Asia",
+      "budget_level": null,
+      "membership": 1.0,
+      "poi_kinds": "interesting_places (100), other (72), tourist_object (70), unclassified_objects (70), religion (20)"
+    },
+    {
+      "name": "Tokyo",
+      "country": "Japan",
+      "region": "Asia",
+      "budget_level": "medium",
+      "membership": 1.0,
+      "poi_kinds": "interesting_places (100), cultural (52), urban_environment (42), architecture (24), installation (24)"
+    },
+    {
+      "name": "Kyoto",
+      "country": "Japan",
+      "region": "Asia",
+      "budget_level": null,
+      "membership": 1.0,
+      "poi_kinds": "interesting_places (100), historic (36), religion (32), monuments (31), monuments_and_memorials (31)"
+    },
+    {
+      "name": "Nara",
+      "country": "Japan",
+      "region": "Asia",
+      "budget_level": null,
+      "membership": 1.0,
+      "poi_kinds": "interesting_places (100), religion (50), other_temples (30), historic (28), buddhist_temples (20)"
+    },
+    {
+      "name": "Seoul",
+      "country": "South Korea",
+      "region": "Asia",
+      "budget_level": "medium",
+      "membership": 1.0,
+      "poi_kinds": "interesting_places (100), cultural (44), architecture (21), historic_architecture (21), historic (19)"
+    },
+    {
+      "name": "Beijing",
+      "country": "China",
+      "region": "Asia",
+      "budget_level": "low",
+      "membership": 1.0,
+      "poi_kinds": "interesting_places (100), historic (36), cultural (35), other (24), urban_environment (24)"
+    },
+    {
+      "name": "Shanghai",
+      "country": "China",
+      "region": "Asia",
+      "budget_level": "medium",
+      "membership": 1.0,
+      "poi_kinds": "interesting_places (100), cultural (34), historic (27), historical_places (20), historic_districts (20)"
+    },
+    {
+      "name": "Hong Kong",
+      "country": "China",
+      "region": "Asia",
+      "budget_level": "high",
+      "membership": 1.0,
+      "poi_kinds": "interesting_places (100), cultural (39), architecture (25), urban_environment (24), skyscrapers (17)"
+    }
+  ],
+  "quality_metrics": {
+    "cluster_id": 2,
+    "hard_cluster_size": 48,
+    "soft_cluster_size": 50,
+    "global_silhouette_umap_space": 0.5266993045806885,
+    "global_dbcv": 0.4387118927321382,
+    "global_noise_ratio": 0.0410958904109589
+  },
+  "proposal": {
+    "tag_name": "Asian Cultural Heritage",
+    "description": "This cluster comprises major Asian locations characterized by their profound historical, religious, and cultural significance. The group includes ancient spiritual centers such as Varanasi, Kyoto, and Nara, alongside major urban hubs like Tokyo, Seoul, Beijing, Shanghai, and Hong Kong. These sites are unified by their rich architectural heritage, historic landmarks, and deep-seated cultural identities."
+  },
+  "timestamp": "2026-07-06T15:59:56.408521+00:00"
+}

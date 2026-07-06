@@ -65,7 +65,11 @@ async def extract_request_fields(
         },
         {"role": "user", "content": _build_request_field_extraction_prompt(prompt)},
     ]
-    final_text = await provider.complete(messages, max_tokens=500, temperature=0.0)
+    # max_tokens well above the actual JSON payload size needed - Gemma 4
+    # (the current default model) spends a substantial token budget on
+    # internal "thinking" before the real answer; too low a ceiling here
+    # truncates mid-thought and returns an empty response (confirmed live).
+    final_text = await provider.complete(messages, max_tokens=2048, temperature=0.0)
 
     if not final_text:
         raise RuntimeError("The LLM returned an empty extraction response.")
@@ -185,7 +189,9 @@ async def propose_cluster_tag(
             ),
         },
     ]
-    final_text = await provider.complete(messages, max_tokens=400, temperature=0.2)
+    # Same reasoning as extract_request_fields's max_tokens - Gemma 4's
+    # thinking overhead needs headroom above the actual JSON payload size.
+    final_text = await provider.complete(messages, max_tokens=2048, temperature=0.2)
 
     if not final_text:
         raise RuntimeError(f"The LLM returned an empty naming response for cluster {cluster_id}.")

@@ -1,0 +1,82 @@
+{
+  "cluster_id": 0,
+  "example_destinations": [
+    {
+      "name": "Buenos Aires",
+      "country": "Argentina",
+      "region": "South America",
+      "budget_level": "medium",
+      "membership": 1.0,
+      "poi_kinds": "interesting_places (100), cultural (58), urban_environment (32), architecture (23), historic_architecture (23)"
+    },
+    {
+      "name": "Mendoza",
+      "country": "Argentina",
+      "region": "South America",
+      "budget_level": null,
+      "membership": 1.0,
+      "poi_kinds": "interesting_places (100), cultural (53), urban_environment (24), religion (21), other (20)"
+    },
+    {
+      "name": "Santiago",
+      "country": "Chile",
+      "region": "South America",
+      "budget_level": "medium",
+      "membership": 1.0,
+      "poi_kinds": "interesting_places (100), religion (35), cultural (31), other_temples (27), urban_environment (18)"
+    },
+    {
+      "name": "Valparaiso",
+      "country": "Chile",
+      "region": "South America",
+      "budget_level": null,
+      "membership": 1.0,
+      "poi_kinds": "interesting_places (100), historic (34), monuments (31), monuments_and_memorials (31), cultural (25)"
+    },
+    {
+      "name": "Cusco",
+      "country": "Peru",
+      "region": "South America",
+      "budget_level": null,
+      "membership": 1.0,
+      "poi_kinds": "interesting_places (100), cultural (42), religion (29), urban_environment (22), other_temples (19)"
+    },
+    {
+      "name": "Quito",
+      "country": "Ecuador",
+      "region": "South America",
+      "budget_level": "low",
+      "membership": 1.0,
+      "poi_kinds": "interesting_places (100), religion (45), other_temples (37), cultural (22), architecture (20)"
+    },
+    {
+      "name": "Montevideo",
+      "country": "Uruguay",
+      "region": "South America",
+      "budget_level": "medium",
+      "membership": 1.0,
+      "poi_kinds": "interesting_places (100), cultural (49), religion (19), theatres_and_entertainments (18), architecture (17)"
+    },
+    {
+      "name": "Lima",
+      "country": "Peru",
+      "region": "South America",
+      "budget_level": "low",
+      "membership": 0.8181338568307148,
+      "poi_kinds": "interesting_places (100), cultural (45), religion (24), urban_environment (24), museums (21)"
+    }
+  ],
+  "quality_metrics": {
+    "cluster_id": 0,
+    "hard_cluster_size": 36,
+    "soft_cluster_size": 44,
+    "global_silhouette_umap_space": 0.5266993045806885,
+    "global_dbcv": 0.4387118927321382,
+    "global_noise_ratio": 0.0410958904109589
+  },
+  "proposal": {
+    "tag_name": "South American Cultural Heritage",
+    "description": "This cluster comprises major South American urban centers defined by their rich cultural, religious, and architectural history. The destinations are unified by a strong emphasis on historic landmarks, monuments, and spiritual sites, offering travelers an immersive look into the diverse traditions and urban environments of the continent. From the grand architecture of Buenos Aires and Montevideo to the sacred sites of Cusco and Quito, these cities serve as significant hubs for exploring Latin American heritage."
+  },
+  "timestamp": "2026-07-06T15:59:01.946898+00:00"
+}

@@ -1,0 +1,82 @@
+{
+  "cluster_id": 1,
+  "example_destinations": [
+    {
+      "name": "Dresden",
+      "country": "Germany",
+      "region": "Europe",
+      "budget_level": "medium",
+      "membership": 1.0,
+      "poi_kinds": "interesting_places (100), cultural (43), architecture (39), historic_architecture (39), destroyed_objects (28)"
+    },
+    {
+      "name": "Nice",
+      "country": "France",
+      "region": "Europe",
+      "budget_level": "high",
+      "membership": 1.0,
+      "poi_kinds": "interesting_places (100), cultural (50), urban_environment (28), religion (22), theatres_and_entertainments (19)"
+    },
+    {
+      "name": "Rome",
+      "country": "Italy",
+      "region": "Europe",
+      "budget_level": "medium",
+      "membership": 1.0,
+      "poi_kinds": "interesting_places (100), historic (64), cultural (44), monuments (38), monuments_and_memorials (38)"
+    },
+    {
+      "name": "Venice",
+      "country": "Italy",
+      "region": "Europe",
+      "budget_level": null,
+      "membership": 1.0,
+      "poi_kinds": "interesting_places (100), architecture (57), palaces (48), historic_architecture (48), other (18)"
+    },
+    {
+      "name": "Milan",
+      "country": "Italy",
+      "region": "Europe",
+      "budget_level": "high",
+      "membership": 1.0,
+      "poi_kinds": "interesting_places (100), architecture (38), historic_architecture (37), cultural (31), palaces (23)"
+    },
+    {
+      "name": "Naples",
+      "country": "Italy",
+      "region": "Europe",
+      "budget_level": "medium",
+      "membership": 1.0,
+      "poi_kinds": "interesting_places (100), religion (61), churches (53), catholic_churches (33), historic (20)"
+    },
+    {
+      "name": "Bologna",
+      "country": "Italy",
+      "region": "Europe",
+      "budget_level": "medium",
+      "membership": 1.0,
+      "poi_kinds": "interesting_places (100), architecture (43), historic_architecture (40), religion (35), other_buildings_and_structures (32)"
+    },
+    {
+      "name": "Verona",
+      "country": "Italy",
+      "region": "Europe",
+      "budget_level": "medium",
+      "membership": 1.0,
+      "poi_kinds": "interesting_places (100), religion (41), other_temples (25), architecture (23), historic_architecture (23)"
+    }
+  ],
+  "quality_metrics": {
+    "cluster_id": 1,
+    "hard_cluster_size": 98,
+    "soft_cluster_size": 103,
+    "global_silhouette_umap_space": 0.5266993045806885,
+    "global_dbcv": 0.4387118927321382,
+    "global_noise_ratio": 0.0410958904109589
+  },
+  "proposal": {
+    "tag_name": "European Architectural Heritage",
+    "description": "This cluster comprises prominent European cities characterized by their profound historical significance and rich architectural landscapes. The destinations are unified by a high concentration of cultural landmarks, including historic architecture, religious sites such as churches and temples, and grand palaces. Travelers to these locations are primarily focused on exploring monumental structures and the preserved urban environments that reflect centuries of cultural and religious history."
+  },
+  "timestamp": "2026-07-06T15:59:30.707778+00:00"
+}

@@ -1,0 +1,82 @@
+{
+  "cluster_id": 4,
+  "example_destinations": [
+    {
+      "name": "New York City",
+      "country": "United States",
+      "region": "North America",
+      "budget_level": null,
+      "membership": 1.0,
+      "poi_kinds": "interesting_places (100), architecture (48), historic_architecture (29), cultural (28), other_buildings_and_structures (24)"
+    },
+    {
+      "name": "San Francisco",
+      "country": "United States",
+      "region": "North America",
+      "budget_level": "high",
+      "membership": 1.0,
+      "poi_kinds": "interesting_places (100), cultural (67), urban_environment (30), theatres_and_entertainments (28), religion (20)"
+    },
+    {
+      "name": "Los Angeles",
+      "country": "United States",
+      "region": "North America",
+      "budget_level": "high",
+      "membership": 1.0,
+      "poi_kinds": "interesting_places (100), cultural (66), architecture (46), historic_architecture (40), theatres_and_entertainments (32)"
+    },
+    {
+      "name": "Chicago",
+      "country": "United States",
+      "region": "North America",
+      "budget_level": "high",
+      "membership": 1.0,
+      "poi_kinds": "interesting_places (100), cultural (47), religion (38), other_temples (27), urban_environment (26)"
+    },
+    {
+      "name": "New Orleans",
+      "country": "United States",
+      "region": "North America",
+      "budget_level": "high",
+      "membership": 1.0,
+      "poi_kinds": "interesting_places (100), cultural (45), architecture (44), theatres_and_entertainments (25), historic (23)"
+    },
+    {
+      "name": "Las Vegas",
+      "country": "United States",
+      "region": "North America",
+      "budget_level": "high",
+      "membership": 1.0,
+      "poi_kinds": "interesting_places (100), cultural (61), urban_environment (38), installation (34), architecture (26)"
+    },
+    {
+      "name": "Seattle",
+      "country": "United States",
+      "region": "North America",
+      "budget_level": "high",
+      "membership": 1.0,
+      "poi_kinds": "interesting_places (100), cultural (57), urban_environment (42), architecture (35), sculptures (23)"
+    },
+    {
+      "name": "Denver",
+      "country": "United States",
+      "region": "North America",
+      "budget_level": "high",
+      "membership": 0.6277133150202537,
+      "poi_kinds": "interesting_places (100), cultural (86), urban_environment (81), installation (67), historic (10)"
+    }
+  ],
+  "quality_metrics": {
+    "cluster_id": 4,
+    "hard_cluster_size": 18,
+    "soft_cluster_size": 28,
+    "global_silhouette_umap_space": 0.5266993045806885,
+    "global_dbcv": 0.4387118927321382,
+    "global_noise_ratio": 0.0410958904109589
+  },
+  "proposal": {
+    "tag_name": "Dynamic Urban Metropolises",
+    "description": "This cluster features major North American cities defined by their dense urban environments and rich cultural landscapes. These destinations are characterized by a high concentration of architectural landmarks, diverse entertainment venues, and significant cultural points of interest. From historic structures to modern installations, these cities offer a vibrant metropolitan experience centered on urban exploration and cultural engagement."
+  },
+  "timestamp": "2026-07-06T16:00:32.238202+00:00"
+}

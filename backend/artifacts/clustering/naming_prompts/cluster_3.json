@@ -1,0 +1,82 @@
+{
+  "cluster_id": 3,
+  "example_destinations": [
+    {
+      "name": "Queenstown",
+      "country": "New Zealand",
+      "region": "Oceania",
+      "budget_level": null,
+      "membership": 1.0,
+      "poi_kinds": "interesting_places (100), other (39), architecture (22), view_points (21), historic_architecture (21)"
+    },
+    {
+      "name": "Sydney",
+      "country": "Australia",
+      "region": "Oceania",
+      "budget_level": "high",
+      "membership": 1.0,
+      "poi_kinds": "interesting_places (100), architecture (62), historic_architecture (53), other_buildings_and_structures (45), cultural (32)"
+    },
+    {
+      "name": "Melbourne",
+      "country": "Australia",
+      "region": "Oceania",
+      "budget_level": "high",
+      "membership": 1.0,
+      "poi_kinds": "interesting_places (100), architecture (61), historic_architecture (56), cultural (47), other_buildings_and_structures (47)"
+    },
+    {
+      "name": "Brisbane",
+      "country": "Australia",
+      "region": "Oceania",
+      "budget_level": "medium",
+      "membership": 1.0,
+      "poi_kinds": "interesting_places (100), architecture (64), historic_architecture (52), other_buildings_and_structures (44), cultural (19)"
+    },
+    {
+      "name": "Perth",
+      "country": "Australia",
+      "region": "Oceania",
+      "budget_level": "high",
+      "membership": 1.0,
+      "poi_kinds": "interesting_places (100), architecture (69), historic_architecture (67), other_buildings_and_structures (57), cultural (37)"
+    },
+    {
+      "name": "Auckland",
+      "country": "New Zealand",
+      "region": "Oceania",
+      "budget_level": "medium",
+      "membership": 1.0,
+      "poi_kinds": "interesting_places (100), architecture (52), historic_architecture (50), other_buildings_and_structures (43), cultural (41)"
+    },
+    {
+      "name": "Wellington",
+      "country": "New Zealand",
+      "region": "Oceania",
+      "budget_level": "medium",
+      "membership": 1.0,
+      "poi_kinds": "interesting_places (100), architecture (40), historic_architecture (38), other_buildings_and_structures (38), cultural (33)"
+    },
+    {
+      "name": "Rotorua",
+      "country": "New Zealand",
+      "region": "Oceania",
+      "budget_level": null,
+      "membership": 0.8439505093969446,
+      "poi_kinds": "interesting_places (100), religion (27), natural (26), other_temples (25), natural_springs (25)"
+    }
+  ],
+  "quality_metrics": {
+    "cluster_id": 3,
+    "hard_cluster_size": 10,
+    "soft_cluster_size": 23,
+    "global_silhouette_umap_space": 0.5266993045806885,
+    "global_dbcv": 0.4387118927321382,
+    "global_noise_ratio": 0.0410958904109589
+  },
+  "proposal": {
+    "tag_name": "Oceania Cultural Heritage",
+    "description": "This cluster consists of prominent destinations throughout Australia and New Zealand, characterized by a strong emphasis on architectural and cultural exploration. The locations are unified by their significant historic architecture, diverse cultural landmarks, and notable urban structures, offering a focus on the heritage and built environments of the Oceania region."
+  },
+  "timestamp": "2026-07-06T16:00:16.917285+00:00"
+}

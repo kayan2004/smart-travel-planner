@@ -53,7 +53,14 @@ class Settings(BaseSettings):
     # models (gemini-3.1-*) gets sorted out. Single model, no fast/strong
     # tiers - see backend/README.md's "Provider-Agnostic LLM Layer" section.
     gemini_model: str = "gemma-4-26b-a4b-it"
-    gemini_max_tokens: int = 700
+    # Gemma 4 spends a substantial chunk of max_output_tokens on internal
+    # "thinking" tokens (thought=True response parts) before ever emitting
+    # the actual answer - confirmed live: a trivial prompt used ~1500
+    # thinking tokens before the real ~85-token answer. A low budget (this
+    # was 700) truncates mid-thought (finish_reason=MAX_TOKENS) and
+    # response.text comes back empty. Gemma 4 is free, so being generous
+    # here costs nothing.
+    gemini_max_tokens: int = 4096
     gemini_temperature: float = 0.2
     # Off by default: the shipped model (if any) is trained on a synthetic
     # cold-start bootstrap, not real feedback - see backend/README.md's
