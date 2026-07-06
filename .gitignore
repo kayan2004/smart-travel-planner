@@ -6,4 +6,6 @@ backend/.uv-cache/
 __pycache__/
 *.pyc
 backend/.pytest_cache/
+backend/.coverage
+backend/coverage.xml
 .claude/
