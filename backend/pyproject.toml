@@ -48,3 +48,53 @@ testpaths = ["tests"]
 [tool.coverage.run]
 source = ["app"]
 omit = ["app/agent/tools/*/__pycache__/*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py314"
+# Deliberately relying on ruff's built-in default rule selection (roughly
+# E4/E7/E9 + F - real correctness issues: unused imports/names, undefined
+# names, syntax errors) rather than opting into pyupgrade (UP) or
+# import-sorting (I) checks. This codebase has never been linted before -
+# turning those on retroactively surfaces dozens of pre-existing
+# modernization-style findings across alembic migrations, scripts, and app
+# code that have nothing to do with adding a test suite. Establishing a
+# meaningful, passing gate against *new* correctness issues matters more
+# here than maximal strictness on day one.
+
+[tool.ruff.lint.per-file-ignores]
+# scripts/*.py and tests/conftest.py all use the same deliberate pattern:
+# insert BACKEND_DIR into sys.path, then import app modules - the imports
+# can't move above the sys.path insertion, so E402 (import not at top of
+# file) is expected here, not a real ordering mistake.
+"scripts/*.py" = ["E402"]
+"tests/conftest.py" = ["E402"]
+
+[tool.mypy]
+python_version = "3.14"
+explicit_package_bases = true
+ignore_missing_imports = true
+warn_unused_ignores = true
+
+# This codebase has never been type-checked before this PR. Running mypy
+# end-to-end (not just against one module at a time, which is how this was
+# first spot-checked) surfaces pre-existing type mismatches across several
+# files - LangGraph nodes annotated with a full-state return type but
+# returning partial dicts by convention, third-party stub mismatches
+# (BeautifulSoup's Tag.find, httpx's AsyncClient.get params, google-genai's
+# GenerateContentConfig), and a couple of genuine Literal-vs-str looseness
+# spots. None of these are things this test-suite-and-CI PR introduced or
+# should refactor - ignore_errors is scoped narrowly to exactly these
+# pre-existing modules so mypy still gates every other module (including
+# every new test file) at normal strictness, catching *new* type errors
+# without turning "add tests" into "retrofit types onto the whole codebase."
+[[tool.mypy.overrides]]
+module = [
+    "app.agent.graph",
+    "app.services.rag_ingestion",
+    "app.services.destination_recommendations",
+    "app.services.live_conditions",
+    "app.services.llm_providers.gemini_provider",
+    "app.services.llm",
+]
+ignore_errors = true

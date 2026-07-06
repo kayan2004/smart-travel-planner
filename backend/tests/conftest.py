@@ -185,16 +185,16 @@ async def test_user(db_session):
     from app.core.security import hash_password
     from app.db.models.user import User
 
-    user = User(
+    new_user = User(
         email="fixture-user@test.com",
         hashed_password=hash_password("fixture-password-123"),
         full_name="Fixture User",
         is_active=True,
     )
-    db_session.add(user)
+    db_session.add(new_user)
     await db_session.commit()
-    await db_session.refresh(user)
-    return user
+    await db_session.refresh(new_user)
+    return new_user
 
 
 @pytest_asyncio.fixture(scope="function", loop_scope="session")

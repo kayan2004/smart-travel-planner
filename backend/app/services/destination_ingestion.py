@@ -20,7 +20,7 @@ from app.core.config import Settings
 from app.db.models.destination import Destination
 from app.schemas.destination_ingestion import DestinationSeedEntry, DestinationSeedManifest
 from app.services.rag_ingestion import _extract_main_text
-from app.services.voyage_embeddings import build_text_batches, embed_texts, estimate_text_tokens
+from app.services.voyage_embeddings import build_text_batches, embed_texts
 
 GEOCODING_PATH = "/v1/search"
 WIKIVOYAGE_SUMMARY_CHAR_LIMIT = 1500
