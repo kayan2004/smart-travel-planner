@@ -193,6 +193,7 @@ Postgres the dev stack already uses.
 """
 
 import os
+import subprocess
 import sys
 from pathlib import Path
 
@@ -207,10 +208,7 @@ os.environ.setdefault(
 
 import asyncpg
 import pytest_asyncio
-from alembic import command
-from alembic.config import Config
 from sqlalchemy import text
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
 from app.db.session import create_db_engine, create_session_factory
@@ -235,39 +233,49 @@ TRUNCATE_TABLES = (
 )
 
 
-def _ensure_test_database_exists(database_url: str) -> None:
+async def _ensure_test_database_exists(database_url: str) -> None:
     """Creates the test database if it doesn't exist yet.
 
     Runs a raw asyncpg connection to the `postgres` maintenance database
     (CREATE DATABASE cannot run inside a transaction block, which is why
-    this doesn't go through the app's SQLAlchemy engine).
+    this doesn't go through the app's SQLAlchemy engine). Awaited directly
+    by the (already-async) _test_database_ready fixture below - it must NOT
+    wrap itself in asyncio.run(), since that raises "asyncio.run() cannot
+    be called from a running event loop" when called from inside a fixture
+    that's already executing inside pytest-asyncio's event loop (hit this
+    exact error during execution, fixed by removing the asyncio.run() wrapper).
     """
-    import asyncio
+    # asyncpg's DSN doesn't use the "+asyncpg" SQLAlchemy driver suffix.
+    dsn = database_url.replace("postgresql+asyncpg://", "postgresql://")
+    target_db = dsn.rsplit("/", 1)[1]
+    maintenance_dsn = dsn.rsplit("/", 1)[0] + "/postgres"
 
-    async def _create() -> None:
-        # asyncpg's DSN doesn't use the "+asyncpg" SQLAlchemy driver suffix.
-        dsn = database_url.replace("postgresql+asyncpg://", "postgresql://")
-        target_db = dsn.rsplit("/", 1)[1]
-        maintenance_dsn = dsn.rsplit("/", 1)[0] + "/postgres"
-
-        conn = await asyncpg.connect(maintenance_dsn)
-        try:
-            exists = await conn.fetchval(
-                "SELECT 1 FROM pg_database WHERE datname = $1", target_db
-            )
-            if not exists:
-                await conn.execute(f'CREATE DATABASE "{target_db}"')
-        finally:
-            await conn.close()
-
-    asyncio.run(_create())
+    conn = await asyncpg.connect(maintenance_dsn)
+    try:
+        exists = await conn.fetchval(
+            "SELECT 1 FROM pg_database WHERE datname = $1", target_db
+        )
+        if not exists:
+            await conn.execute(f'CREATE DATABASE "{target_db}"')
+    finally:
+        await conn.close()
 
 
 def _run_migrations(database_url: str) -> None:
-    sync_url = database_url.replace("postgresql+asyncpg://", "postgresql://")
-    alembic_cfg = Config(str(BACKEND_DIR / "alembic.ini"))
-    alembic_cfg.set_main_option("sqlalchemy.url", sync_url)
-    command.upgrade(alembic_cfg, "head")
+    # alembic/env.py is async-native for this project (its run_migrations_online()
+    # calls asyncio.run(run_async_migrations()) internally) - invoking
+    # alembic.command.upgrade() in-process from here would nest a second
+    # asyncio.run() inside the event loop this (already-async) fixture is
+    # running in, raising "asyncio.run() cannot be called from a running
+    # event loop" (hit this exact error during execution). Shelling out as a
+    # subprocess sidesteps the nesting entirely - alembic gets its own event
+    # loop in its own process, same as running `alembic upgrade head` by hand.
+    subprocess.run(
+        [sys.executable, "-m", "alembic", "upgrade", "head"],
+        cwd=BACKEND_DIR,
+        env={**os.environ, "DATABASE_URL": database_url},
+        check=True,
+    )
 
 
 @pytest_asyncio.fixture(scope="session", loop_scope="session", autouse=True)
@@ -277,7 +285,7 @@ async def _test_database_ready():
     assert "test" in settings.database_url, (
         f"Refusing to run tests against a non-test database: {settings.database_url}"
     )
-    _ensure_test_database_exists(settings.database_url)
+    await _ensure_test_database_exists(settings.database_url)
     _run_migrations(settings.database_url)
     yield
 
