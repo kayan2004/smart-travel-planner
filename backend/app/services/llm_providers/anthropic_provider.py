@@ -1,8 +1,11 @@
+import time
+
 import httpx
 
 from app.core.config import Settings
 from app.services.llm_providers.errors import raise_for_status_with_body
 from app.services.llm_providers.protocol import Message, split_system_and_user
+from app.services.llm_providers.usage_logging import log_completion_usage
 
 
 class AnthropicProvider:
@@ -29,6 +32,7 @@ class AnthropicProvider:
         temperature = opts.get("temperature", settings.anthropic_temperature)
         system, user_content = split_system_and_user(messages)
 
+        started_at = time.monotonic()
         response = await self._http_client.post(
             f"{settings.anthropic_api_base_url}/v1/messages",
             headers={
@@ -45,10 +49,21 @@ class AnthropicProvider:
             },
             timeout=settings.weather_request_timeout_seconds,
         )
+        elapsed_seconds = time.monotonic() - started_at
         raise_for_status_with_body(
             response, context=f"Anthropic generation using model '{model}'"
         )
         payload = response.json()
+
+        usage = payload.get("usage") or {}
+        log_completion_usage(
+            provider="anthropic",
+            model=model,
+            input_tokens=usage.get("input_tokens", 0),
+            output_tokens=usage.get("output_tokens", 0),
+            latency_seconds=elapsed_seconds,
+        )
+
         content_blocks = payload.get("content") or []
         text_parts = [
             block.get("text", "").strip()

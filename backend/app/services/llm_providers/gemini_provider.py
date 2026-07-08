@@ -1,3 +1,4 @@
+import time
 from functools import lru_cache
 
 from google import genai
@@ -5,6 +6,7 @@ from google.genai import types
 
 from app.core.config import Settings
 from app.services.llm_providers.protocol import Message, split_system_and_user
+from app.services.llm_providers.usage_logging import log_completion_usage
 
 
 @lru_cache(maxsize=1)
@@ -39,6 +41,7 @@ class GeminiProvider:
         temperature = opts.get("temperature", settings.gemini_temperature)
         system, user_content = split_system_and_user(messages)
 
+        started_at = time.monotonic()
         response = await self._client.aio.models.generate_content(
             model=model,
             contents=user_content,
@@ -47,5 +50,21 @@ class GeminiProvider:
                 max_output_tokens=max_tokens,
                 temperature=temperature,
             ),
+        )
+        elapsed_seconds = time.monotonic() - started_at
+
+        usage = response.usage_metadata
+        thinking_tokens = (usage.thoughts_token_count or 0) if usage else 0
+        log_completion_usage(
+            provider="gemini",
+            model=model,
+            input_tokens=(usage.prompt_token_count or 0) if usage else 0,
+            output_tokens=(usage.candidates_token_count or 0) if usage else 0,
+            latency_seconds=elapsed_seconds,
+            # Gemma 4 spends a real, sometimes-large token budget on internal
+            # "thinking" before the visible answer (see gemini_max_tokens's
+            # comment in app/core/config.py) - tracked separately from
+            # output_tokens since it's diagnostic, not part of the answer.
+            extra_tokens={"thinking_tokens": thinking_tokens} if thinking_tokens else None,
         )
         return (response.text or "").strip()

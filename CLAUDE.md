@@ -130,8 +130,18 @@ cluster naming. Provider dispatch lives in `services/llm_providers.py`'s `LLMPro
 
 ## Known gaps (see README "Known Gaps" for the full list)
 
-No LangSmith/tracing, no per-step token/cost logging, no webhook retry-with-backoff. Be aware of
-these when asked to "wire up retries" — there's no existing pattern for those to extend.
+No webhook retry-with-backoff. Be aware of this when asked to "wire up retries" — there's no
+existing pattern for those to extend.
+
+**Token/cost logging and structured tracing now exist** (2026-07-06) - real Python `logging`
+(structured, via `extra={}`), not LangSmith/OpenTelemetry (no new external account/service). The
+LLM provider layer logs token counts + an estimated dollar cost per call
+(`app/services/llm_providers/usage_logging.py`); `app/services/tool_logs.py`'s `create_tool_log()`
+logs every tool execution in the trip-planner pipeline (the one place graph nodes, recommendation
+persistence, and Discord delivery all pass through). `configure_logging()`
+(`app/core/logging_config.py`) must be called for these to actually emit - already wired into
+`main.py` and `scripts/cluster_destinations.py`'s `name` phase (the only offline script that makes
+LLM calls); a new script that does the same needs the same call.
 
 **Automated tests + CI now exist** (`backend/tests/`, `.github/workflows/ci.yml`) - pytest +
 pytest-asyncio against a dedicated test Postgres (never the dev DB), truncate-based isolation

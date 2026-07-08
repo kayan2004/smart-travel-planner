@@ -29,6 +29,7 @@ if str(BACKEND_DIR) not in sys.path:
     sys.path.insert(0, str(BACKEND_DIR))
 
 from app.core.config import get_settings
+from app.core.logging_config import configure_logging
 from app.db.session import create_db_engine, create_session_factory
 from app.services import clustering
 
@@ -230,6 +231,7 @@ async def _run_apply_tags_phase() -> None:
 
 
 async def main() -> None:
+    configure_logging()
     args = _parse_args()
     if args.phase == "cluster":
         await _run_cluster_phase(args)

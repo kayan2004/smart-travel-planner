@@ -15,9 +15,11 @@ from app.api.routes.rag_retrieval import router as rag_retrieval_router
 from app.api.routes.recommendations import router as recommendations_router
 from app.core.config import get_settings
 from app.core.lifespan import lifespan
+from app.core.logging_config import configure_logging
 
 
 def create_app() -> FastAPI:
+    configure_logging()
     settings = get_settings()
 
     application = FastAPI(

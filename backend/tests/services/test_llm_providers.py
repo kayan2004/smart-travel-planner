@@ -80,7 +80,11 @@ async def test_gemini_provider_parses_response_text():
     settings = Settings(gemini_api_key="test-key", llm_provider="gemini")
     provider = GeminiProvider(settings)
 
-    fake_response = type("FakeResponse", (), {"text": "hello from gemini"})()
+    # usage_metadata=None matches a real (if unusual) SDK response shape -
+    # complete() must not crash reading token counts off of it.
+    fake_response = type(
+        "FakeResponse", (), {"text": "hello from gemini", "usage_metadata": None}
+    )()
     with patch.object(
         provider._client.aio.models, "generate_content", new_callable=AsyncMock
     ) as mock_generate:
@@ -90,6 +94,66 @@ async def test_gemini_provider_parses_response_text():
     assert result == "hello from gemini"
     _, call_kwargs = mock_generate.call_args
     assert call_kwargs["model"] == settings.gemini_model
+
+
+@pytest.mark.asyncio(loop_scope="session")
+async def test_gemini_provider_logs_token_usage(caplog):
+    """Priority 6/7 coverage: token/cost logging in the LLM provider layer."""
+    settings = Settings(gemini_api_key="test-key", llm_provider="gemini", gemini_model="gemma-4-26b-a4b-it")
+    provider = GeminiProvider(settings)
+
+    fake_usage = type(
+        "FakeUsage",
+        (),
+        {"prompt_token_count": 12, "candidates_token_count": 34, "thoughts_token_count": 56},
+    )()
+    fake_response = type(
+        "FakeResponse", (), {"text": "hello", "usage_metadata": fake_usage}
+    )()
+
+    with patch.object(
+        provider._client.aio.models, "generate_content", new_callable=AsyncMock
+    ) as mock_generate:
+        mock_generate.return_value = fake_response
+        with caplog.at_level("INFO", logger="app.llm_usage"):
+            await provider.complete([{"role": "user", "content": "hi"}])
+
+    records = [r for r in caplog.records if r.name == "app.llm_usage"]
+    assert len(records) == 1
+    assert records[0].input_tokens == 12
+    assert records[0].output_tokens == 34
+    assert records[0].thinking_tokens == 56
+    assert records[0].llm_model == "gemma-4-26b-a4b-it"
+    # gemma-4-26b-a4b-it is priced at (0.0, 0.0) - free tier, confirmed live.
+    assert records[0].estimated_cost_usd == 0.0
+
+
+@pytest.mark.asyncio(loop_scope="session")
+async def test_anthropic_provider_logs_token_usage(caplog):
+    """Priority 6/7 coverage: token/cost logging in the LLM provider layer."""
+    settings = Settings(anthropic_api_key="test-key", anthropic_model="claude-haiku-4-5")
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            200,
+            json={
+                "content": [{"type": "text", "text": "hi there"}],
+                "usage": {"input_tokens": 20, "output_tokens": 5},
+            },
+        )
+
+    transport = httpx.MockTransport(handler)
+    async with httpx.AsyncClient(transport=transport) as client:
+        provider = AnthropicProvider(settings, http_client=client)
+        with caplog.at_level("INFO", logger="app.llm_usage"):
+            await provider.complete([{"role": "user", "content": "hi"}])
+
+    records = [r for r in caplog.records if r.name == "app.llm_usage"]
+    assert len(records) == 1
+    assert records[0].input_tokens == 20
+    assert records[0].output_tokens == 5
+    # claude-haiku-4-5 is priced at (1.00, 5.00) USD/MTok - (20*1.00 + 5*5.00) / 1_000_000.
+    assert records[0].estimated_cost_usd == pytest.approx((20 * 1.00 + 5 * 5.00) / 1_000_000)
 
 
 @pytest.mark.asyncio(loop_scope="session")

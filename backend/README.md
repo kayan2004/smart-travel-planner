@@ -872,3 +872,33 @@ Implement the `LLMProvider` protocol (`app/services/llm_providers/protocol.py`) 
 `messages` call into that provider's own request shape - and add it to `get_llm_provider()`'s
 dispatch (`app/services/llm_providers/factory.py`). `app/services/llm.py`'s three orchestration
 functions need no changes.
+
+### Token/cost logging and pipeline tracing
+
+Real Python `logging` (structured, via `extra={}`), not LangSmith or OpenTelemetry - both would
+need a new external account/service (a LangSmith API key, an OTel collector) this environment
+doesn't have configured, the same situation the Gemini billing setup was in earlier. `logging`
+closes the observability gap with zero new signups.
+
+- **Token/cost logging** (`app/services/llm_providers/usage_logging.py`) - both `AnthropicProvider`
+  and `GeminiProvider` call `log_completion_usage()` right before returning, with real token counts
+  read off the provider's own response (`usage.input_tokens`/`output_tokens` for Anthropic,
+  `response.usage_metadata.prompt_token_count`/`candidates_token_count` for Gemini - plus
+  `thoughts_token_count`, logged separately as `thinking_tokens` since Gemma 4 spends a real,
+  sometimes-large budget on internal reasoning before the visible answer). `MODEL_PRICING_USD_PER_MILLION_TOKENS`
+  is a small, explicit table - verified live against each provider's own current pricing page on
+  2026-07-06 (`ai.google.dev/gemini-api/docs/pricing`, `platform.claude.com/docs/en/about-claude/pricing`),
+  not from memory. A model string not in the table logs real token counts but reports
+  `estimated_cost_usd: None` (never a guessed `$0.00`) rather than fabricate a price. Sample log
+  line: `llm_completion provider=gemini model=gemma-4-26b-a4b-it input_tokens=8 output_tokens=3
+  cost=$0.000000 latency=5.620s`.
+- **Pipeline tracing** (`app/services/tool_logs.py`) - `create_tool_log()` is the one place every
+  tool execution in the trip-planner pipeline passes through (graph nodes, recommendation
+  persistence, Discord delivery - see `app/services/agent_runs.py`'s call sites), so logging there
+  gives full pipeline observability from a single, low-risk edit instead of touching every node
+  function in `app/agent/graph.py` individually.
+- **`configure_logging()`** (`app/core/logging_config.py`, one `logging.basicConfig()` call) has to
+  actually run for any of this to be visible - Python's root logger has no handler by default, and
+  INFO-level records are silently dropped otherwise. Wired into `main.py` (the live app) and
+  `scripts/cluster_destinations.py`'s `name` phase (the only offline script that calls through the
+  LLM provider layer) - a new script that makes LLM calls needs the same one-line call.
