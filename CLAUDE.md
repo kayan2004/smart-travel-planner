@@ -130,8 +130,11 @@ cluster naming. Provider dispatch lives in `services/llm_providers.py`'s `LLMPro
 
 ## Known gaps (see README "Known Gaps" for the full list)
 
-No webhook retry-with-backoff. Be aware of this when asked to "wire up retries" — there's no
-existing pattern for those to extend.
+**Discord webhook retry-with-backoff now exists** (2026-07-06, `app/services/discord_webhook.py`) -
+retries `429`/`5xx`/network errors, does not retry other `4xx` (permanently broken webhook URL). If
+another integration needs the same pattern, this is the one to extend, alongside
+`app/services/voyage_embeddings.py`'s own retry loop (real-vs-permanent-failure split, `Retry-After`
+handling).
 
 **Token/cost logging and structured tracing now exist** (2026-07-06) - real Python `logging`
 (structured, via `extra={}`), not LangSmith/OpenTelemetry (no new external account/service). The

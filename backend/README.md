@@ -549,6 +549,23 @@ flush/write-path-only issue. Do not "fix" this by changing `Recommendation`'s FK
 merging the two declarative bases - that's a real, deliberate conceptual split (see "Why
 `Destination` stays on its own declarative base" above), not a mistake to undo.
 
+## Discord Webhook Delivery (`app/services/discord_webhook.py`)
+
+`send_discord_message()` now retries on transient failures (2026-07-06 - previously fire-once, no
+retry): a `429` (rate limited, honoring Discord's own `Retry-After` header when present), any `5xx`,
+or a network-level error (`httpx.TransportError` - connection refused, timeout, DNS failure).
+Exponential backoff (`DISCORD_WEBHOOK_RETRY_BACKOFF_SECONDS * 2**attempt`) when there's no
+`Retry-After` header to honor. `DISCORD_WEBHOOK_MAX_RETRIES` (default `3`) caps the attempts - same
+naming convention as `VOYAGE_MAX_RETRIES`/`DESTINATION_MAX_RETRIES`.
+
+**Deliberately does not retry** a `4xx` other than `429` (a deleted/invalid webhook URL, a malformed
+payload) - retrying a permanently broken webhook just burns the retry budget for no chance of
+success, the same real-vs-permanent-failure split `app/services/voyage_embeddings.py`'s own retry
+loop already makes. A failed delivery (after exhausting retries) is still caught and logged as a
+`tool_logs` entry (`discord_webhook_delivery`, `status="failed"`) by
+`app/services/agent_runs.py::create_agent_run` rather than failing the user-facing response - that
+graceful-degradation behavior is unchanged, only how many attempts happen before giving up.
+
 ## Learning-to-Rank: Cold-Start Bootstrap Ranker
 
 `recommend_destinations()` (`app/services/destination_recommendations.py`) retrieves candidates

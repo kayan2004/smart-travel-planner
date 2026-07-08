@@ -71,6 +71,8 @@ class Settings(BaseSettings):
     discord_webhook_url: str = ""
     discord_webhook_username: str = "Smart Travel Assistant"
     discord_webhook_timeout_seconds: float = 15.0
+    discord_webhook_max_retries: int = 3
+    discord_webhook_retry_backoff_seconds: float = 1.0
     open_meteo_geocoding_base_url: str = "https://geocoding-api.open-meteo.com"
     open_meteo_forecast_base_url: str = "https://api.open-meteo.com"
     weather_request_timeout_seconds: float = 20.0
