@@ -5,7 +5,7 @@ sections below go deeper on implementation; the model card is the "what and why"
 
 ## Running Tests
 
-![CI](https://github.com/kayan2004/smart-travel-assistant/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/kayan2004/smart-travel-planner/actions/workflows/ci.yml/badge.svg)
 
 ```powershell
 # One-time: create the test database (same Postgres the dev stack uses)
