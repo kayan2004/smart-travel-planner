@@ -13,8 +13,15 @@ from tests.conftest import mock_voyage_transport
 # the mocked transport if settings.voyage.api_key is empty, and CI has no
 # .env file at all - this passed locally only because the dev .env happens
 # to have a real key, masking the bug until CI ran it for real.
+#
+# ranker_enabled=False here is deliberate, not the production default: these
+# tests exercise the SQL pre-filter/relaxation and raw cosine-similarity
+# ordering in isolation. Leaving the real ranker on would let it reorder
+# results by its own (cosine_sim/tag_match_count/budget_delta/region_match)
+# scoring and confound what each test is actually checking - the ranker's
+# own behavior belongs in a dedicated test, not folded into these.
 def _test_settings() -> Settings:
-    return Settings(voyage=VoyageSettings(api_key="test-voyage-key"))
+    return Settings(voyage=VoyageSettings(api_key="test-voyage-key"), ranker_enabled=False)
 
 
 @pytest.mark.asyncio(loop_scope="session")

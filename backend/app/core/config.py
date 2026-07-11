@@ -213,12 +213,13 @@ class Settings(BaseSettings):
     anthropic: AnthropicSettings = Field(default_factory=AnthropicSettings)
     gemini: GeminiSettings = Field(default_factory=GeminiSettings)
 
-    # Off by default: the shipped model (if any) is trained on a synthetic
-    # cold-start bootstrap, not real feedback - see backend/README.md's
-    # "Learning-to-Rank" section. When True AND artifacts/ranker/model.joblib
-    # exists, recommend_destinations() re-ranks the cosine-retrieved slate
-    # with it; otherwise cosine order is used, exactly as before.
-    ranker_enabled: bool = False
+    # On by default: recommend_destinations() re-ranks the cosine-retrieved
+    # slate with the LightGBM ranker whenever artifacts/ranker/model.joblib
+    # exists (falls back to cosine order if it doesn't). The shipped model is
+    # still trained on a synthetic cold-start bootstrap, not real feedback -
+    # see backend/README.md's "Learning-to-Rank" section for that caveat and
+    # the real-feedback retrain path (scripts/train_ranker.py retrain).
+    ranker_enabled: bool = True
 
     discord: DiscordSettings = Field(default_factory=DiscordSettings)
     weather: WeatherSettings = Field(default_factory=WeatherSettings)
