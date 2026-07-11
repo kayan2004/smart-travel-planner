@@ -9,3 +9,4 @@ backend/.pytest_cache/
 backend/.coverage
 backend/coverage.xml
 .claude/
+CLAUDE.md
