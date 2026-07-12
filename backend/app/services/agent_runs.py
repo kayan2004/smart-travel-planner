@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.agent.planner import run_trip_planner
+from app.agent.planner import PlannerNeedsInput, run_trip_planner
 from app.agent.tools.base import ToolContext
 from app.agent.tools.registry import ToolRegistry
 from app.db.models.agent_run import AgentRun
@@ -18,12 +18,15 @@ async def create_agent_run(
     *,
     tool_registry: ToolRegistry | None = None,
     tool_context: ToolContext | None = None,
-) -> AgentRun:
+) -> AgentRun | PlannerNeedsInput:
     planner_result = await run_trip_planner(
         payload,
         tool_registry=tool_registry,
         tool_context=tool_context,
     )
+
+    if isinstance(planner_result, PlannerNeedsInput):
+        return planner_result
 
     agent_run = AgentRun(
         user_id=current_user.id,
