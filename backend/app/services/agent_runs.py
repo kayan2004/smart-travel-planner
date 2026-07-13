@@ -1,3 +1,5 @@
+import logging
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.agent.planner import run_trip_planner
@@ -9,6 +11,8 @@ from app.schemas.agent_runs import AgentRunCreate
 from app.services.discord_webhook import send_trip_plan_to_discord
 from app.services.recommendation_persistence import persist_recommendation_slate
 from app.services.tool_logs import create_tool_log
+
+logger = logging.getLogger(__name__)
 
 
 async def create_agent_run(
@@ -58,15 +62,19 @@ async def create_agent_run(
             status="completed",
         )
     except Exception as exc:
+        logger.exception("Recommendation slate persistence failed")
         await session.rollback()
         await create_tool_log(
             session,
             agent_run,
             tool_name="recommendation_persistence",
             input_payload=f"{len(planner_result.recommended_destinations)} slate row(s)",
-            output_payload=(
-                f"Recommendation slate persistence failed: {type(exc).__name__}: {exc}"
-            ),
+            # Type only, not str(exc) - a DB error's full message can carry
+            # internal details (constraint names, partial query text); the
+            # full traceback goes to the server log above instead. This
+            # payload flows straight into the API response and the
+            # frontend's visible "Tool trail".
+            output_payload=f"Recommendation slate persistence failed: {type(exc).__name__}.",
             status="failed",
         )
 
@@ -89,14 +97,13 @@ async def create_agent_run(
                 status="completed",
             )
         except Exception as exc:
+            logger.exception("Discord delivery failed")
             await create_tool_log(
                 session,
                 agent_run,
                 tool_name="discord_webhook_delivery",
                 input_payload=payload.prompt.strip(),
-                output_payload=(
-                    f"Discord delivery failed: {type(exc).__name__}: {exc}"
-                ),
+                output_payload=f"Discord delivery failed: {type(exc).__name__}.",
                 status="failed",
             )
 

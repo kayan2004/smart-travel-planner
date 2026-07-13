@@ -361,6 +361,8 @@ function App() {
             <div className="gt-segmented" role="tablist" aria-label="Auth mode">
               <button
                 type="button"
+                role="tab"
+                aria-selected={authMode === 'login'}
                 className={authMode === 'login' ? 'gt-segmented-btn active' : 'gt-segmented-btn'}
                 onClick={() => handleAuthViewChange('login')}
               >
@@ -368,6 +370,8 @@ function App() {
               </button>
               <button
                 type="button"
+                role="tab"
+                aria-selected={authMode === 'signup'}
                 className={authMode === 'signup' ? 'gt-segmented-btn active' : 'gt-segmented-btn'}
                 onClick={() => handleAuthViewChange('signup')}
               >
@@ -467,6 +471,10 @@ function App() {
                 value={prompt}
                 onChange={(event) => setPrompt(event.target.value)}
                 rows={7}
+                // Matches the backend's AgentRunCreate.prompt cap
+                // (max_length=4000, app/schemas/agent_runs.py) - client-side
+                // feedback instead of only finding out via a failed request.
+                maxLength={4000}
                 required
               />
             </label>

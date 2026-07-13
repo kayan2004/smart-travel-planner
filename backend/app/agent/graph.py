@@ -1,4 +1,5 @@
 import json
+import logging
 from dataclasses import dataclass
 from functools import lru_cache
 from typing import Any, NotRequired, TypedDict
@@ -14,6 +15,8 @@ from app.schemas.rag_retrieval import RagRetrievalRequest
 from app.schemas.recommendations import DestinationRecommendationRequest
 from app.services.llm import extract_request_fields, synthesize_trip_response
 from app.services.llm_providers import LLMAuthenticationError
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -124,11 +127,17 @@ async def extract_request_fields_node(
             "tool_logs": tool_logs,
         }
     except Exception as exc:
+        logger.exception("Request field extraction failed")
         tool_logs.append(
             {
                 "tool_name": "request_field_extractor",
+                # Exception type only, not str(exc) - the full message
+                # (which for a DB/HTTP/provider error can carry internal
+                # details) goes to the server log above, not to
+                # tool_logs.output_payload, which flows straight into the
+                # API response and the frontend's visible "Tool trail".
                 "input_payload": state["prompt"],
-                "output_payload": f"Extraction failed: {type(exc).__name__}: {exc}",
+                "output_payload": f"Extraction failed: {type(exc).__name__}.",
                 "status": "failed",
             }
         )
@@ -255,11 +264,12 @@ async def retrieve_context_node(
             "tool_logs": tool_logs,
         }
     except Exception as exc:
+        logger.exception("RAG retrieval failed")
         tool_logs.append(
             {
                 "tool_name": "destination_context_retriever",
                 "input_payload": json.dumps(retrieval_input),
-                "output_payload": f"RAG retrieval failed: {type(exc).__name__}: {exc}",
+                "output_payload": f"RAG retrieval failed: {type(exc).__name__}.",
                 "status": "failed",
             }
         )
@@ -312,12 +322,13 @@ async def recommend_destinations_node(
             tool_context,
         )
     except Exception as exc:
+        logger.exception("Destination recommendation failed")
         tool_logs.append(
             {
                 "tool_name": "destination_recommender",
                 "input_payload": json.dumps(recommendation_input.model_dump(mode="json")),
                 "output_payload": (
-                    f"Destination recommendation failed: {type(exc).__name__}: {exc}"
+                    f"Destination recommendation failed: {type(exc).__name__}."
                 ),
                 "status": "failed",
             }
@@ -469,12 +480,13 @@ async def live_conditions_node(
             "tool_logs": tool_logs,
         }
     except Exception as exc:
+        logger.exception("Live conditions lookup failed")
         tool_logs.append(
             {
                 "tool_name": "live_conditions",
                 "input_payload": json.dumps(live_conditions_input),
                 "output_payload": (
-                    f"Live conditions lookup failed: {type(exc).__name__}: {exc}"
+                    f"Live conditions lookup failed: {type(exc).__name__}."
                 ),
                 "status": "failed",
             }

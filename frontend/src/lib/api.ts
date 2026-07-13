@@ -12,6 +12,35 @@ const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '') ??
   'http://localhost:8000'
 
+// VITE_API_BASE_URL is baked in at build time (Vite inlines it into the
+// bundle, it can't be changed at container runtime) - the current
+// deployment target is a single-host docker-compose setup where
+// http://localhost:8000 is correct, but if this build ever gets deployed
+// somewhere else without overriding the build arg, every API call would
+// silently fail against the wrong host with nothing but a generic network
+// error to debug from. This makes that misconfiguration loud and
+// immediately diagnosable instead: if the page itself isn't being served
+// from localhost but API_BASE_URL still points there, something's wrong
+// with how this image was built. Exported as a pure function (rather than
+// just a module-load-time side effect) so the logic is directly testable
+// without fighting ESM module-caching semantics.
+export function isLocalhostApiUrlMismatch(hostname: string, apiBaseUrl: string): boolean {
+  const pageIsLocalhost = hostname === 'localhost' || hostname === '127.0.0.1'
+  const apiIsLocalhost = /^https?:\/\/(localhost|127\.0\.0\.1)(:|\/|$)/.test(apiBaseUrl)
+  return !pageIsLocalhost && apiIsLocalhost
+}
+
+if (
+  typeof window !== 'undefined' &&
+  isLocalhostApiUrlMismatch(window.location.hostname, API_BASE_URL)
+) {
+  console.warn(
+    `[config] This app is running on ${window.location.hostname}, but its API base URL ` +
+      `(${API_BASE_URL}) still points at localhost. VITE_API_BASE_URL was likely not set ` +
+      'at build time for this deployment - API calls will fail. See frontend/Dockerfile.',
+  )
+}
+
 type RequestOptions = {
   method?: 'GET' | 'POST'
   body?: unknown
@@ -44,6 +73,17 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
   })
 
   if (!response.ok) {
+    // 5xx bodies are never shown verbatim, regardless of shape - a server
+    // error response is exactly where an accidental future change (a new
+    // exception handler, a debug flag flipped) is most likely to leak
+    // internal detail. Every 4xx `detail` in this API is a deliberately
+    // written, safe, user-facing string (see backend/app/api/routes/ and
+    // app/services/*.py's HTTPException call sites) - those are fine to
+    // surface directly, that's what they're for.
+    if (response.status >= 500) {
+      throw new ApiError('Something went wrong on our end - please try again.', response.status)
+    }
+
     const payload = await response.json().catch(() => null)
     const detail =
       typeof payload?.detail === 'string'

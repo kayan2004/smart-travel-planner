@@ -32,8 +32,16 @@ from app.core.rate_limit import (
     agent_run_ip_rate_limiter,
     agent_run_user_rate_limiter,
     auth_ip_rate_limiter,
+    feedback_ip_rate_limiter,
 )
 from app.db.session import create_db_engine, create_session_factory
+
+_ALL_RATE_LIMITERS = (
+    agent_run_ip_rate_limiter,
+    agent_run_user_rate_limiter,
+    auth_ip_rate_limiter,
+    feedback_ip_rate_limiter,
+)
 
 
 @pytest_asyncio.fixture(autouse=True)
@@ -44,10 +52,10 @@ async def _reset_rate_limiters():
     tests/api/ does) would eventually trip a limit meant for real abuse, not
     normal test traffic.
     """
-    for limiter in (agent_run_ip_rate_limiter, agent_run_user_rate_limiter, auth_ip_rate_limiter):
+    for limiter in _ALL_RATE_LIMITERS:
         limiter._hits.clear()
     yield
-    for limiter in (agent_run_ip_rate_limiter, agent_run_user_rate_limiter, auth_ip_rate_limiter):
+    for limiter in _ALL_RATE_LIMITERS:
         limiter._hits.clear()
 
 # Registers every ORM model's mapper before any query touches Recommendation
@@ -229,6 +237,32 @@ async def auth_headers(test_user):
 
     token = create_access_token(test_user.email)
     return {"Authorization": f"Bearer {token}"}
+
+
+@pytest_asyncio.fixture(scope="function", loop_scope="session")
+async def api_client(engine):
+    """An httpx.AsyncClient against the real FastAPI app via ASGITransport,
+    with get_db_session overridden to the test DB - deliberately doesn't run
+    the app's lifespan (no tool registry, no shared http_client), which is
+    fine for routes that don't need app.state.resources (auth, feedback).
+    Routes that do (agent-runs) have their own dedicated fixture instead -
+    see tests/api/test_agent_runs.py.
+    """
+    from app.db.dependencies import get_db_session
+    from app.db.session import create_session_factory
+    from main import app
+
+    factory = create_session_factory(engine)
+
+    async def override_get_db_session():
+        async with factory() as session:
+            yield session
+
+    app.dependency_overrides[get_db_session] = override_get_db_session
+    transport = httpx.ASGITransport(app=app)
+    async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+        yield client
+    app.dependency_overrides.clear()
 
 
 def mock_voyage_transport(embedding: list[float] | None = None) -> httpx.MockTransport:

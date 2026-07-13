@@ -54,3 +54,8 @@ agent_run_user_rate_limiter = InMemoryRateLimiter(max_requests=10, window_second
 # purpose: these are classic credential-stuffing/brute-force targets, not
 # just cost-abuse targets.
 auth_ip_rate_limiter = InMemoryRateLimiter(max_requests=10, window_seconds=60.0)
+
+# Scoped to /feedback - deliberately unauthenticated by design (session_uuid
+# is client-generated, no login required), so this closes the spam/vote-
+# stuffing abuse gap without changing that anonymous-by-design UX.
+feedback_ip_rate_limiter = InMemoryRateLimiter(max_requests=30, window_seconds=60.0)

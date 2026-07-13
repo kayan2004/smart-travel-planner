@@ -1,31 +1,10 @@
 """Priority 4 coverage: signup/login/me. Uses httpx.ASGITransport directly
 (not TestClient) so the app's lifespan (builds the tool registry, etc.)
-never runs - irrelevant here.
+never runs - irrelevant here. The api_client fixture itself now lives in
+conftest.py since tests/api/test_feedback.py needs it too.
 """
 
-import httpx
 import pytest
-import pytest_asyncio
-
-from app.db.dependencies import get_db_session
-from main import app
-
-
-@pytest_asyncio.fixture(scope="function", loop_scope="session")
-async def api_client(engine):
-    from app.db.session import create_session_factory
-
-    factory = create_session_factory(engine)
-
-    async def override_get_db_session():
-        async with factory() as session:
-            yield session
-
-    app.dependency_overrides[get_db_session] = override_get_db_session
-    transport = httpx.ASGITransport(app=app)
-    async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
-        yield client
-    app.dependency_overrides.clear()
 
 
 @pytest.mark.asyncio(loop_scope="session")

@@ -36,7 +36,7 @@ class _AlwaysFailsTool(BaseTool):
 
 
 @pytest.mark.asyncio(loop_scope="session")
-async def test_tool_failure_produces_failed_tool_log_and_partial_status():
+async def test_tool_failure_produces_failed_tool_log_and_partial_status(caplog):
     registry = ToolRegistry()
     registry.register(_AlwaysFailsTool())
     context = ToolContext(settings=get_settings(), resources={}, session=None, http_client=None)
@@ -50,13 +50,28 @@ async def test_tool_failure_produces_failed_tool_log_and_partial_status():
         "tool_logs": [],
     }
 
-    result = await retrieve_context_node(state, runtime)
+    with caplog.at_level("ERROR", logger="app.agent.graph"):
+        result = await retrieve_context_node(state, runtime)
 
     assert result["status"] == "partial"
     failed_logs = [log for log in result["tool_logs"] if log["status"] == "failed"]
     assert len(failed_logs) == 1
     assert failed_logs[0]["tool_name"] == "destination_context_retriever"
-    assert "simulated RAG retrieval failure" in failed_logs[0]["output_payload"]
+    # The exception's own message is deliberately NOT included in the API
+    # response - only the type name is (app/agent/graph.py sanitizes this
+    # before it flows into the response / frontend "Tool trail").
+    assert "RuntimeError" in failed_logs[0]["output_payload"]
+    assert "simulated RAG retrieval failure" not in failed_logs[0]["output_payload"]
+    # ...but it's not lost - the full detail still reaches the server log
+    # via logger.exception(), for operators to actually debug with.
+    # record.getMessage() only returns the static "RAG retrieval failed"
+    # string; the exception itself (with its message) lives on
+    # record.exc_info, which is what logger.exception() attaches.
+    assert any(
+        record.exc_info is not None
+        and "simulated RAG retrieval failure" in str(record.exc_info[1])
+        for record in caplog.records
+    )
 
 
 @pytest.mark.asyncio(loop_scope="session")
