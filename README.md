@@ -7,7 +7,6 @@ An end-to-end smart travel planner that turns a natural-language trip request in
 - retrieved destination context from a pgvector-backed RAG store
 - live weather conditions
 - a synthesized final answer
-- a Discord webhook delivery
 
 The system is built with a FastAPI backend, a React frontend, Postgres + pgvector, and a LangGraph
 orchestration layer. An earlier version of this pipeline also had an ML travel-style classifier
@@ -51,13 +50,12 @@ Implemented:
 - Postgres persistence for users, runs, tool logs, and embeddings
 - JWT auth
 - React frontend
-- Discord webhook delivery
 - full-stack `docker compose`
 
 Since this section was first written, the following have landed: structured pipeline tracing +
-token/cost logging (`app/services/llm_providers/usage_logging.py`, `app/core/logging_config.py`),
-Discord webhook retry-with-backoff (`app/services/discord_webhook.py`), and a pytest suite + CI
-(`backend/tests/`, `.github/workflows/ci.yml`) - see `backend/MODEL_CARD.md` and this repo's
+token/cost logging (`app/services/llm_providers/usage_logging.py`, `app/core/logging_config.py`)
+and a pytest suite + CI (`backend/tests/`, `.github/workflows/ci.yml`) - see `backend/MODEL_CARD.md`
+and this repo's
 "Known Gaps" section below for what's real vs. still open. Still missing relative to the brief:
 
 - a fully chat-style, multi-turn frontend (current UI is single-shot request -> response)
@@ -77,7 +75,7 @@ The current app flow is:
 5. The RAG tool retrieves destination context from embedded Wikivoyage documents.
 6. The live conditions tool checks current weather through Open-Meteo.
 7. The same LLM provider synthesizes the final answer.
-8. The run is saved to Postgres and posted to Discord.
+8. The run is saved to Postgres.
 
 ## Architecture
 
@@ -99,7 +97,6 @@ flowchart LR
     SYN --> API
 
     API --> DB[(Postgres)]
-    API --> WEBHOOK[Discord Webhook]
 ```
 
 > The SVC travel-style classifier was retired from this path 2026-07-05 (see `backend/README.md`'s
@@ -526,18 +523,6 @@ The frontend is a React + Vite app with:
 
 The frontend currently behaves more like a structured planner UI than a true streaming chat interface.
 
-## Webhook Delivery
-
-The app currently posts finished trip plans to Discord via webhook.
-
-Design goal already met:
-
-- webhook failure does **not** break the user-facing response
-
-Current gap relative to the brief:
-
-- retry with backoff is not yet implemented
-
 ## Docker
 
 The stack can now be started with:
@@ -624,7 +609,6 @@ Important keys include:
 - `JWT_SECRET_KEY`
 - `VOYAGE_API_KEY`
 - `ANTHROPIC_API_KEY`
-- `DISCORD_WEBHOOK_URL`
 - `FRONTEND_ORIGIN`
 
 ## Engineering Choices
@@ -650,7 +634,6 @@ Updated 2026-07-08 - several items below were closed this session; see `backend/
   external account needed), covering the LLM provider layer and the full trip-planner pipeline.
 - ~~token usage / cost accounting~~ - per-call token counts + an estimated dollar cost, logged from
   the LLM provider layer.
-- ~~webhook retry with backoff~~ - Discord delivery now retries on `429`/`5xx`/network errors.
 - ~~tests and CI~~ - `backend/tests/` (pytest + pytest-asyncio) and `.github/workflows/ci.yml` now
   exist.
 

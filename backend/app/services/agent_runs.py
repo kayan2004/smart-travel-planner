@@ -10,7 +10,6 @@ from app.agent.tools.registry import ToolRegistry
 from app.db.models.agent_run import AgentRun
 from app.db.models.user import User
 from app.schemas.agent_runs import AgentRunCreate
-from app.services.discord_webhook import send_trip_plan_to_discord
 from app.services.recommendation_persistence import persist_recommendation_slate
 from app.services.tool_logs import create_tool_log
 
@@ -79,35 +78,6 @@ async def create_agent_run(
             output_payload=f"Recommendation slate persistence failed: {type(exc).__name__}.",
             status="failed",
         )
-
-    if tool_context is not None and tool_context.http_client is not None:
-        try:
-            await send_trip_plan_to_discord(
-                tool_context.http_client,
-                tool_context.settings,
-                user_email=current_user.email,
-                prompt=payload.prompt.strip(),
-                response_text=planner_result.response,
-                status=planner_result.status,
-            )
-            await create_tool_log(
-                session,
-                agent_run,
-                tool_name="discord_webhook_delivery",
-                input_payload=payload.prompt.strip(),
-                output_payload="Trip plan delivered to Discord successfully.",
-                status="completed",
-            )
-        except Exception as exc:
-            logger.exception("Discord delivery failed")
-            await create_tool_log(
-                session,
-                agent_run,
-                tool_name="discord_webhook_delivery",
-                input_payload=payload.prompt.strip(),
-                output_payload=f"Discord delivery failed: {type(exc).__name__}.",
-                status="failed",
-            )
 
     await session.refresh(agent_run, attribute_names=["tool_logs", "recommendations"])
     return agent_run

@@ -94,12 +94,6 @@ async def agent_runs_env(engine):
     base_settings.llm_provider = "anthropic"
     base_settings.anthropic.api_key = "server-default-key"
     base_settings.anthropic.model = "claude-haiku-4-5"
-    # Disabled so create_agent_run()'s Discord delivery step doesn't fire a
-    # real request through the shared (mocked) http_client and pollute
-    # transport.captured_requests with a discord.com entry - it degrades to
-    # a failed tool_log when the URL is empty (see discord_webhook.py),
-    # never a crash.
-    base_settings.discord.webhook_url = ""
     app.state.settings = base_settings
 
     transport = _llm_mock_transport()

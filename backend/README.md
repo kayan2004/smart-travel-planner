@@ -26,7 +26,7 @@ tests is **truncate-after**, not transactional rollback - several services under
 internally (`persist_recommendation_slate`, `submit_feedback`), which would silently defeat a
 rollback-based recipe.
 
-All external HTTP (Voyage, Anthropic, Open-Meteo, Discord) is mocked via `httpx.MockTransport`; the
+All external HTTP (Voyage, Anthropic, Open-Meteo) is mocked via `httpx.MockTransport`; the
 `google-genai` SDK (Gemini) is mocked by patching its client method directly, since that SDK doesn't
 go through httpx. No live API calls happen in the test suite, ever.
 
@@ -536,8 +536,8 @@ As of the 2026-07-06 session, `recommendations` and `feedback` are no longer sch
   (its `id` is the FK target, so persistence can only happen after that commit) - see
   `app/services/recommendation_persistence.py::persist_recommendation_slate`. A persistence
   failure is logged as its own `tool_logs` entry (`recommendation_persistence`, `status="failed"`)
-  and does not fail the user-facing response, matching the existing Discord-webhook-delivery
-  pattern in the same file.
+  and does not fail the user-facing response - an isolated-failure pattern used throughout
+  `app/services/agent_runs.py`.
 - **`feedback`**: anonymous thumbs up/down, one row per `(recommendation_id, session_uuid)` -
   enforced by a real Postgres unique constraint (`uq_feedback_recommendation_session`, added in
   the `b1f4a9d3e7c2` migration), not just application-level deduplication. Re-submitting the same
@@ -577,23 +577,6 @@ code path) - this bypasses the ORM flush machinery entirely while still returnin
 flush/write-path-only issue. Do not "fix" this by changing `Recommendation`'s FK declaration or
 merging the two declarative bases - that's a real, deliberate conceptual split (see "Why
 `Destination` stays on its own declarative base" above), not a mistake to undo.
-
-## Discord Webhook Delivery (`app/services/discord_webhook.py`)
-
-`send_discord_message()` now retries on transient failures (2026-07-06 - previously fire-once, no
-retry): a `429` (rate limited, honoring Discord's own `Retry-After` header when present), any `5xx`,
-or a network-level error (`httpx.TransportError` - connection refused, timeout, DNS failure).
-Exponential backoff (`DISCORD_WEBHOOK_RETRY_BACKOFF_SECONDS * 2**attempt`) when there's no
-`Retry-After` header to honor. `DISCORD_WEBHOOK_MAX_RETRIES` (default `3`) caps the attempts - same
-naming convention as `VOYAGE_MAX_RETRIES`/`DESTINATION_MAX_RETRIES`.
-
-**Deliberately does not retry** a `4xx` other than `429` (a deleted/invalid webhook URL, a malformed
-payload) - retrying a permanently broken webhook just burns the retry budget for no chance of
-success, the same real-vs-permanent-failure split `app/services/voyage_embeddings.py`'s own retry
-loop already makes. A failed delivery (after exhausting retries) is still caught and logged as a
-`tool_logs` entry (`discord_webhook_delivery`, `status="failed"`) by
-`app/services/agent_runs.py::create_agent_run` rather than failing the user-facing response - that
-graceful-degradation behavior is unchanged, only how many attempts happen before giving up.
 
 ## Learning-to-Rank: Cold-Start Bootstrap Ranker
 
@@ -960,10 +943,10 @@ closes the observability gap with zero new signups.
   line: `llm_completion provider=gemini model=gemma-4-26b-a4b-it input_tokens=8 output_tokens=3
   cost=$0.000000 latency=5.620s`.
 - **Pipeline tracing** (`app/services/tool_logs.py`) - `create_tool_log()` is the one place every
-  tool execution in the trip-planner pipeline passes through (graph nodes, recommendation
-  persistence, Discord delivery - see `app/services/agent_runs.py`'s call sites), so logging there
-  gives full pipeline observability from a single, low-risk edit instead of touching every node
-  function in `app/agent/graph.py` individually.
+  tool execution in the trip-planner pipeline passes through (graph nodes and recommendation
+  persistence - see `app/services/agent_runs.py`'s call sites), so logging there gives full
+  pipeline observability from a single, low-risk edit instead of touching every node function in
+  `app/agent/graph.py` individually.
 - **`configure_logging()`** (`app/core/logging_config.py`, one `logging.basicConfig()` call) has to
   actually run for any of this to be visible - Python's root logger has no handler by default, and
   INFO-level records are silently dropped otherwise. Wired into `main.py` (the live app) and

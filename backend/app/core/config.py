@@ -190,18 +190,6 @@ class OpenAISettings(BaseSettings):
     temperature: float = 0.2
 
 
-class DiscordSettings(BaseSettings):
-    model_config = SettingsConfigDict(
-        env_prefix="DISCORD_", env_file=ENV_FILE, env_file_encoding="utf-8", extra="ignore"
-    )
-
-    webhook_url: str = ""
-    webhook_username: str = "Smart Travel Planner"
-    webhook_timeout_seconds: float = 15.0
-    webhook_max_retries: int = 3
-    webhook_retry_backoff_seconds: float = 1.0
-
-
 class WeatherSettings(BaseSettings):
     """Live weather (Open-Meteo). The two base URLs kept their original
     OPEN_METEO_* env var names (predates this settings group) via an explicit
@@ -280,7 +268,6 @@ class Settings(BaseSettings):
     # the real-feedback retrain path (scripts/train_ranker.py retrain).
     ranker_enabled: bool = True
 
-    discord: DiscordSettings = Field(default_factory=DiscordSettings)
     weather: WeatherSettings = Field(default_factory=WeatherSettings)
     destination: DestinationSettings = Field(default_factory=DestinationSettings)
     opentripmap: OpenTripMapSettings = Field(default_factory=OpenTripMapSettings)
