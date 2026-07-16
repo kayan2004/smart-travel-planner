@@ -28,18 +28,8 @@ describe('WhyThisPick', () => {
     await user.click(screen.getByText('Why this pick?'))
 
     expect(screen.getByText('84%')).toBeInTheDocument()
-    expect(screen.getByText('2 shared interests')).toBeInTheDocument()
     expect(screen.getByText('1 tier under your budget ceiling')).toBeInTheDocument()
     expect(screen.getByText('Yes')).toBeInTheDocument()
-  })
-
-  it('singularizes one shared interest', async () => {
-    const user = userEvent.setup()
-    render(<WhyThisPick features={{ ...sampleFeatures, tag_match_count: 1 }} />)
-
-    await user.click(screen.getByText('Why this pick?'))
-
-    expect(screen.getByText('1 shared interest')).toBeInTheDocument()
   })
 
   it('renders a "no match" chip and message when region/budget signals say so', async () => {
@@ -52,7 +42,6 @@ describe('WhyThisPick', () => {
 
     await user.click(screen.getByText('Why this pick?'))
 
-    expect(screen.getByText('No shared interest tags')).toBeInTheDocument()
     expect(screen.getByText('Budget comparison unavailable')).toBeInTheDocument()
     expect(screen.getByText('No')).toBeInTheDocument()
   })

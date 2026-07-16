@@ -17,11 +17,6 @@ function formatBudgetFit(budgetDelta: number | null): string {
     : `${steps} ${noun} over your budget ceiling`
 }
 
-function formatTagOverlap(tagMatchCount: number): string {
-  if (tagMatchCount === 0) return 'No shared interest tags'
-  return `${tagMatchCount} shared interest${tagMatchCount === 1 ? '' : 's'}`
-}
-
 function formatSemanticMatchPercent(cosineSim: number): number {
   return Math.round(Math.min(1, Math.max(0, cosineSim)) * 100)
 }
@@ -42,13 +37,6 @@ export function WhyThisPick({ features }: WhyThisPickProps) {
             </div>
             <span className="gt-mono-sm why-pick-value">
               {formatSemanticMatchPercent(features.cosine_sim)}%
-            </span>
-          </div>
-
-          <div className="why-pick-row">
-            <span className="gt-eyebrow">Tag overlap</span>
-            <span className="gt-mono-sm why-pick-value">
-              {formatTagOverlap(features.tag_match_count)}
             </span>
           </div>
 
