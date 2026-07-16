@@ -50,11 +50,16 @@ type RequestOptions = {
 
 class ApiError extends Error {
   status: number
+  // Machine-readable code from a structured error body (e.g. the 402
+  // free-tier gates return {reason, message}). Lets callers branch on the
+  // cause without matching the human-facing message string.
+  reason?: string
 
-  constructor(message: string, status: number) {
+  constructor(message: string, status: number, reason?: string) {
     super(message)
     this.name = 'ApiError'
     this.status = status
+    this.reason = reason
   }
 }
 
@@ -86,13 +91,24 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     }
 
     const payload = await response.json().catch(() => null)
-    const detail =
-      typeof payload?.detail === 'string'
-        ? payload.detail
-        : Array.isArray(payload?.detail)
-          ? payload.detail.map((item: { msg?: string }) => item.msg).join(', ')
+    const rawDetail = payload?.detail
+    let detail: string
+    let reason: string | undefined
+    if (typeof rawDetail === 'string') {
+      detail = rawDetail
+    } else if (Array.isArray(rawDetail)) {
+      detail = rawDetail.map((item: { msg?: string }) => item.msg).join(', ')
+    } else if (rawDetail && typeof rawDetail === 'object') {
+      // Structured error body, e.g. the free-tier gates' {reason, message}.
+      detail =
+        typeof rawDetail.message === 'string'
+          ? rawDetail.message
           : `Request failed with status ${response.status}`
-    throw new ApiError(detail, response.status)
+      reason = typeof rawDetail.reason === 'string' ? rawDetail.reason : undefined
+    } else {
+      detail = `Request failed with status ${response.status}`
+    }
+    throw new ApiError(detail, response.status, reason)
   }
 
   if (response.status === 204) {

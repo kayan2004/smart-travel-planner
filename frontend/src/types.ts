@@ -73,6 +73,9 @@ export interface AgentRunRead {
   created_at: string
   tool_logs: ToolLogRead[]
   recommendations: RecommendationRead[]
+  // Free server-key runs left after this response. 0 means the next run
+  // needs a BYOK key - the UI reveals the BYOK panel when it hits 0.
+  free_runs_remaining?: number | null
 }
 
 export interface AgentRunSummary {

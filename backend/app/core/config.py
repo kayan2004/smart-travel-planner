@@ -268,6 +268,23 @@ class Settings(BaseSettings):
     # the real-feedback retrain path (scripts/train_ranker.py retrain).
     ranker_enabled: bool = True
 
+    # Free-tier abuse protection for a public deploy paying for LLM calls on
+    # the SERVER's key. A request that brings its own key (BYOK) bypasses
+    # both of these entirely - the user is paying, so there's nothing to
+    # protect. Enforced in app/api/routes/agent_runs.py against persisted
+    # agent_runs rows (survives restart/redeploy, unlike the in-memory rate
+    # limiter). See backend/README.md's "Server-Key Free Tier" section.
+    #  - Per account, lifetime: after this many server-key runs the account
+    #    must switch to BYOK to keep planning.
+    free_server_runs_per_account: int = 1
+    #  - Global, per UTC calendar month: once the summed estimated cost of
+    #    all server-key runs this month reaches this ceiling, EVERY user
+    #    falls back to BYOK until the month rolls over. A coarse backstop
+    #    against multi-account signup abuse (which the per-account cap alone
+    #    can't stop). Estimated cost, not the real Google bill - see
+    #    app/services/llm_providers/usage_logging.py's pricing table.
+    server_key_monthly_budget_usd: float = 1.0
+
     weather: WeatherSettings = Field(default_factory=WeatherSettings)
     destination: DestinationSettings = Field(default_factory=DestinationSettings)
     opentripmap: OpenTripMapSettings = Field(default_factory=OpenTripMapSettings)

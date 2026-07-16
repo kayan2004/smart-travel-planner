@@ -1,6 +1,7 @@
 import logging
+from datetime import datetime, timezone
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -10,6 +11,7 @@ from app.agent.tools.registry import ToolRegistry
 from app.db.models.agent_run import AgentRun
 from app.db.models.user import User
 from app.schemas.agent_runs import AgentRunCreate
+from app.services.llm_providers.cost_tracking import reset_cost_accumulator
 from app.services.recommendation_persistence import persist_recommendation_slate
 from app.services.tool_logs import create_tool_log
 
@@ -24,6 +26,11 @@ async def create_agent_run(
     tool_registry: ToolRegistry | None = None,
     tool_context: ToolContext | None = None,
 ) -> AgentRun:
+    # Install a fresh per-run cost accumulator before any LLM call fires;
+    # every provider call adds its estimated cost to this exact object (see
+    # llm_providers/cost_tracking.py). Read after the graph finishes.
+    cost_accumulator = reset_cost_accumulator()
+
     planner_result = await run_trip_planner(
         payload,
         tool_registry=tool_registry,
@@ -35,6 +42,8 @@ async def create_agent_run(
         prompt=payload.prompt.strip(),
         response=planner_result.response,
         status=planner_result.status,
+        used_byok=bool(tool_context is not None and tool_context.is_byok),
+        estimated_cost_usd=cost_accumulator.total_usd,
     )
     session.add(agent_run)
     await session.commit()
@@ -125,3 +134,36 @@ async def get_agent_run_for_user(
     )
     result = await session.execute(statement)
     return result.scalar_one_or_none()
+
+
+async def count_server_key_runs_for_user(session: AsyncSession, user_id: int) -> int:
+    """Lifetime count of this user's runs on the SERVER's key (not BYOK).
+
+    Deliberately ignores deleted_at: a soft-deleted run still consumed a free
+    run and cost real money, so counting it prevents a delete-then-rerun
+    refund loophole on the per-account free tier.
+    """
+    statement = (
+        select(func.count())
+        .select_from(AgentRun)
+        .where(AgentRun.user_id == user_id, AgentRun.used_byok.is_(False))
+    )
+    result = await session.execute(statement)
+    return int(result.scalar_one())
+
+
+async def sum_server_key_cost_this_month(session: AsyncSession) -> float:
+    """Summed estimated cost of ALL users' server-key runs in the current UTC
+    calendar month - the denominator of the global monthly budget gate.
+    coalesce so an all-NULL/empty result is 0.0, not None.
+    """
+    now = datetime.now(timezone.utc)
+    month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    statement = select(
+        func.coalesce(func.sum(AgentRun.estimated_cost_usd), 0.0)
+    ).where(
+        AgentRun.used_byok.is_(False),
+        AgentRun.created_at >= month_start,
+    )
+    result = await session.execute(statement)
+    return float(result.scalar_one() or 0.0)

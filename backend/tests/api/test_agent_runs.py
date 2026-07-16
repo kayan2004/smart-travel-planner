@@ -94,6 +94,12 @@ async def agent_runs_env(engine):
     base_settings.llm_provider = "anthropic"
     base_settings.anthropic.api_key = "server-default-key"
     base_settings.anthropic.model = "claude-haiku-4-5"
+    # Free-tier gates default permissive here so the many tests that make
+    # several server-key runs per user (rate-limit, history-ordering) aren't
+    # coupled to them. The dedicated gate tests below set these low
+    # explicitly via app.state.settings.
+    base_settings.free_server_runs_per_account = 1000
+    base_settings.server_key_monthly_budget_usd = 1_000_000.0
     app.state.settings = base_settings
 
     transport = _llm_mock_transport()
@@ -432,3 +438,110 @@ async def test_list_agent_runs_requires_auth(agent_runs_env):
     client, _transport = agent_runs_env
     response = await client.get("/agent-runs")
     assert response.status_code == 401
+
+
+# --- Server-key free tier: per-account quota + global monthly budget ---
+
+
+@pytest.mark.asyncio(loop_scope="session")
+async def test_free_quota_blocks_second_server_key_run_with_402(agent_runs_env):
+    client, _transport = agent_runs_env
+    app.state.settings.free_server_runs_per_account = 1
+    token = await _signup_and_login(client, "free-quota@test.com")
+    headers = {"Authorization": f"Bearer {token}"}
+
+    first = await client.post("/agent-runs", json={"prompt": "First free run."}, headers=headers)
+    second = await client.post("/agent-runs", json={"prompt": "Second run, blocked."}, headers=headers)
+
+    assert first.status_code == 201
+    assert first.json()["free_runs_remaining"] == 0
+    assert second.status_code == 402
+    assert second.json()["detail"]["reason"] == "free_quota_exhausted"
+
+
+@pytest.mark.asyncio(loop_scope="session")
+async def test_byok_run_bypasses_exhausted_free_quota(agent_runs_env):
+    client, _transport = agent_runs_env
+    app.state.settings.free_server_runs_per_account = 1
+    token = await _signup_and_login(client, "byok-bypass@test.com")
+
+    # Consume the one free server-key run.
+    await client.post(
+        "/agent-runs",
+        json={"prompt": "The one free run."},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    # A BYOK run must still go through - the user is paying their own way.
+    byok = await client.post(
+        "/agent-runs",
+        json={"prompt": "BYOK run.", "llm_provider": "openai", "llm_model": "gpt-5.4-nano"},
+        headers={"Authorization": f"Bearer {token}", "X-LLM-API-Key": "user-byok-key"},
+    )
+
+    assert byok.status_code == 201
+
+
+@pytest.mark.asyncio(loop_scope="session")
+async def test_byok_run_does_not_consume_free_quota(agent_runs_env):
+    client, _transport = agent_runs_env
+    app.state.settings.free_server_runs_per_account = 1
+    token = await _signup_and_login(client, "byok-no-consume@test.com")
+
+    # A BYOK run first - must NOT count against the free server-key quota.
+    byok = await client.post(
+        "/agent-runs",
+        json={"prompt": "BYOK first.", "llm_provider": "openai", "llm_model": "gpt-5.4-nano"},
+        headers={"Authorization": f"Bearer {token}", "X-LLM-API-Key": "user-byok-key"},
+    )
+    # The user's one free server-key run should still be available.
+    server = await client.post(
+        "/agent-runs",
+        json={"prompt": "Free server run still available."},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert byok.status_code == 201
+    assert server.status_code == 201
+    assert server.json()["free_runs_remaining"] == 0
+
+
+@pytest.mark.asyncio(loop_scope="session")
+async def test_global_monthly_budget_blocks_with_402(agent_runs_env):
+    client, _transport = agent_runs_env
+    # High per-account limit so the free-quota gate never trips first; a tiny
+    # budget so the first run's recorded cost pushes the month over.
+    app.state.settings.free_server_runs_per_account = 1000
+    app.state.settings.server_key_monthly_budget_usd = 0.00001
+    token = await _signup_and_login(client, "global-budget@test.com")
+    headers = {"Authorization": f"Bearer {token}"}
+
+    first = await client.post("/agent-runs", json={"prompt": "First, under budget."}, headers=headers)
+    second = await client.post("/agent-runs", json={"prompt": "Second, over budget."}, headers=headers)
+
+    assert first.status_code == 201
+    assert second.status_code == 402
+    assert second.json()["detail"]["reason"] == "global_budget_exhausted"
+
+
+@pytest.mark.asyncio(loop_scope="session")
+async def test_global_budget_counts_only_server_key_runs(agent_runs_env):
+    client, _transport = agent_runs_env
+    app.state.settings.free_server_runs_per_account = 1000
+    app.state.settings.server_key_monthly_budget_usd = 0.00001
+    token = await _signup_and_login(client, "budget-byok-only@test.com")
+
+    # Only BYOK runs so far - none of their cost is the server's, so the
+    # server budget stays at 0 and a later server-key run is still allowed.
+    for _ in range(3):
+        await client.post(
+            "/agent-runs",
+            json={"prompt": "BYOK spend.", "llm_provider": "openai", "llm_model": "gpt-5.4-nano"},
+            headers={"Authorization": f"Bearer {token}", "X-LLM-API-Key": "user-byok-key"},
+        )
+    server = await client.post(
+        "/agent-runs",
+        json={"prompt": "First server-key run, budget still fresh."},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert server.status_code == 201

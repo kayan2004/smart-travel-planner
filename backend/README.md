@@ -781,6 +781,35 @@ artifact cleanly on each run - but it is not incremental: adding a handful of de
 already-clustered corpus means re-fitting from scratch, not assigning the new rows to existing
 clusters.
 
+## Server-Key Free Tier
+
+A public deploy pays for LLM calls on the server's own key, so `POST /agent-runs` gates runs that
+use it. A request that brings its own key (`X-LLM-API-Key`, BYOK) bypasses both gates entirely -
+it's the user's own spend. Two limits, both enforced in `app/api/routes/agent_runs.py` against
+persisted `agent_runs` rows (so they survive restart/redeploy, unlike the in-memory rate limiter):
+
+- **Per account, lifetime** (`FREE_SERVER_RUNS_PER_ACCOUNT`, default `1`): once an account has this
+  many server-key runs, the next one is refused. Counted via `count_server_key_runs_for_user()`,
+  which deliberately ignores `deleted_at` so a delete-then-rerun can't refund the free run.
+- **Global, per UTC calendar month** (`SERVER_KEY_MONTHLY_BUDGET_USD`, default `1.0`): once the
+  summed *estimated* cost of all server-key runs this month reaches the ceiling, every account
+  falls back to BYOK until the month rolls over. This is the real backstop against multi-account
+  signup abuse, which the per-account cap alone can't stop.
+
+A blocked run returns **402** with a structured body `{"detail": {"reason": ..., "message": ...}}`
+(`reason` is `free_quota_exhausted` or `global_budget_exhausted`) so the frontend can branch to
+"reveal the BYOK panel" without matching the message string. Successful responses also carry
+`free_runs_remaining`, which the frontend uses to reveal BYOK proactively the moment it hits 0.
+
+**Cost capture**: `provider.complete()` only returns text, so per-call cost (computed in
+`usage_logging.py`) is accumulated request-scoped via a `ContextVar` holding a mutable
+`CostAccumulator` (`llm_providers/cost_tracking.py`). `create_agent_run()` resets it before the
+graph runs and persists the total to `agent_runs.estimated_cost_usd` (alongside `used_byok`). The
+budget is *estimated* from the pricing table, not the real Google bill - a coarse safety cap, and
+at flash-lite prices `$1` is several hundred runs. Note the limits are per-process for the count
+query but backed by the shared DB, so they hold correctly across replicas (unlike the in-memory
+rate limiter).
+
 ## Provider-Agnostic LLM Layer
 
 All three LLM call sites (field extraction, trip synthesis, offline cluster naming) go through

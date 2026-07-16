@@ -32,6 +32,11 @@ class AgentRunRead(BaseModel):
     created_at: datetime
     tool_logs: list[ToolLogRead] = []
     recommendations: list[RecommendationRead] = []
+    # How many free server-key runs the caller has left after this response.
+    # The frontend reveals the BYOK panel when this hits 0 (the "show BYOK
+    # once the free prompt is used" behavior). None on rows where it wasn't
+    # computed. Not a stored column - populated by the route per request.
+    free_runs_remaining: int | None = None
 
     model_config = ConfigDict(from_attributes=True)
 

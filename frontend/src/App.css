@@ -366,6 +366,19 @@
   font: var(--text-body-sm);
 }
 
+/* Shown when the free run is used / a 402 gate blocks a run - a prompt to
+   bring your own key, not an error, so it uses the brass accent rather than
+   the red error tone. */
+.byok-notice {
+  margin: var(--space-2) 0 0;
+  padding: var(--space-3);
+  border: var(--stroke-hairline) solid var(--brass);
+  border-radius: var(--radius-sm);
+  background: var(--surface-inset);
+  color: var(--text-primary);
+  font: var(--text-body-sm);
+}
+
 .shell {
   display: grid;
   gap: var(--space-6);

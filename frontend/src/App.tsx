@@ -148,6 +148,11 @@ function App() {
   const [historyError, setHistoryError] = useState('')
   const [historyLoadingId, setHistoryLoadingId] = useState<number | null>(null)
   const [isHistoryOpen, setIsHistoryOpen] = useState(false)
+  // Controls the BYOK panel's open state so the app can auto-reveal it once
+  // the free server-key run is used (or a 402 gate blocks a run); byokNotice
+  // is the explanatory line shown inside it when that happens.
+  const [byokPanelOpen, setByokPanelOpen] = useState(false)
+  const [byokNotice, setByokNotice] = useState('')
 
   const authMode: AuthMode = view === 'signup' ? 'signup' : 'login'
 
@@ -360,10 +365,32 @@ function App() {
       )
       setResult(agentRun)
       await refreshHistory()
+      // "Show BYOK once the free prompt is used": a server-key run that
+      // leaves 0 free runs means the next one needs the user's own key.
+      if (!useByok && agentRun.free_runs_remaining === 0) {
+        setByokPanelOpen(true)
+        setByokNotice(
+          'That was your free trip plan. Add your own API key below to keep ' +
+            'planning - it stays in this browser tab only, never stored on our servers.',
+        )
+      } else if (useByok) {
+        // A working BYOK run - drop any leftover "add your key" prompt.
+        setByokNotice('')
+      }
     } catch (error) {
-      setPlannerError(
-        error instanceof ApiError ? error.message : 'Trip planning failed.',
-      )
+      // A 402 from the free-tier gates (free quota used, or the shared
+      // monthly budget spent) isn't a failure to apologize for - it's a
+      // prompt to bring your own key, so reveal the panel instead of just
+      // showing a red error.
+      if (error instanceof ApiError && error.status === 402) {
+        setByokPanelOpen(true)
+        setByokNotice(error.message)
+        setPlannerError('')
+      } else {
+        setPlannerError(
+          error instanceof ApiError ? error.message : 'Trip planning failed.',
+        )
+      }
     } finally {
       setPlannerPending(false)
     }
@@ -400,6 +427,8 @@ function App() {
     setResult(null)
     setHistory([])
     setIsHistoryOpen(false)
+    setByokNotice('')
+    setByokPanelOpen(false)
   }
 
   function handleByokOptionChange(value: string) {
@@ -413,6 +442,7 @@ function App() {
 
   function handleRemoveByokKey() {
     setByokSelection({ provider: '', model: '', apiKey: '' })
+    setByokNotice('')
   }
 
   if (!sessionChecked) {
@@ -578,8 +608,17 @@ function App() {
               />
             </label>
 
-            <details className="gt-panel gt-panel--raised byok-panel">
+            <details
+              className="gt-panel gt-panel--raised byok-panel"
+              open={byokPanelOpen}
+              onToggle={(event) => setByokPanelOpen(event.currentTarget.open)}
+            >
               <summary>Use your own API key</summary>
+              {byokNotice ? (
+                <p className="byok-notice" role="status">
+                  {byokNotice}
+                </p>
+              ) : null}
               <p className="byok-copy">
                 Your key stays in this browser tab only (sessionStorage) and is sent only with
                 your own requests - it is never stored server-side or logged. Leave this empty to

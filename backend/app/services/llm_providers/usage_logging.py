@@ -9,6 +9,8 @@ dropped by Python's default "no handler configured" root logger behavior.
 
 import logging
 
+from app.services.llm_providers.cost_tracking import record_cost
+
 logger = logging.getLogger("app.llm_usage")
 
 # USD per 1,000,000 tokens, as (input_price, output_price). Verified live
@@ -67,6 +69,11 @@ def log_completion_usage(
     estimated_cost_usd = estimate_cost_usd(
         model, input_tokens=input_tokens, output_tokens=output_tokens
     )
+    # Accumulate into the request-scoped total the server-key budget gate
+    # reads (app/services/agent_runs.py). An unknown-pricing model (None)
+    # contributes 0.0 - it can't drain a dollar budget we can't price, and
+    # the default server model is always priced, so this is a corner case.
+    record_cost(estimated_cost_usd or 0.0)
     cost_display = f"${estimated_cost_usd:.6f}" if estimated_cost_usd is not None else "unknown"
     # The message itself carries the key numbers (not just extra={}), so
     # they're visible in plain-text console output too, not only to a
